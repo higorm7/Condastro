@@ -42,11 +42,9 @@ strlen:
 		lb   $t1, 0($t0)		# Inicializa $t1 com o caractere da string
 		sne  $t2, $t1, $zero	# Compara o caractere em $t1 com '\0' e salva o booleano em $t2
 		beqz $t2, strlen_end	# Se $t2 for zero, branch para strlen_end
-		
-		addi $s0, $s0, 1		# Adiciona o contador da string
-		addi $t0, $t0, 1		# Adiciona 1 byte ao endereço contido em $t0: 
-								# segue para o próximo caractere
-		
+			addi $s0, $s0, 1		# Adiciona o contador da string
+			addi $t0, $t0, 1		# Adiciona 1 byte ao endereço contido em $t0: 
+									# segue para o próximo caractere
 		b strlen_loop			# Recomeça o loop
 		
 	strlen_end:
@@ -67,4 +65,5 @@ strlen:
 exit:
 	ori  $v0, $zero, 10	# Serviço 10 indica encerramento do programa
 	syscall
-
+	
+	
