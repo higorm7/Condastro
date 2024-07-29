@@ -72,6 +72,8 @@ main:
 	jal printInt
 	
 	jal exit
+	
+	
 .data
 	Prompt1: 	.asciiz "Digite a primeira string: "
 	Prompt2:	.asciiz	"Digite a segunda string: "
