@@ -43,7 +43,7 @@ printInt:
 
 # Subprograma:		strlen
 # PropÃ³sito:		Contar a quantidade de caracteres numa string
-# Input:			$a0 - EndereÃ§o da string alvo
+# Input:			$a0 - Endereco da string alvo
 # Retorno:			$v0 - Quantidade de caracteres na string
 # Side effects:		Nao se aplicam
 .text
