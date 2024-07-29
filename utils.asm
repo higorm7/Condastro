@@ -69,7 +69,51 @@ strlen:
 		addi $sp, $sp, 8		# Devolve a memÃ³ria Ã  pilha
 		
 		jr   $ra				# Retorna ao programa que o chamou
+
+
+# Subprograma:	comparaTamanho
+# Prop�sito:	Comparar os tamanhos de duas strings
+# Input:	$a0 - endere�o da string 1
+#		$a1 - endere�o da string 2
+# Retorno:	$v0 - valor de compara��o (-1 se str1 for menor, 1 se st1 for maior, 0 se o tamanho for igual)
+# Side effects:	N�o se aplica
+.text
+comparaTamanho:
+	addi $sp, $sp, -12 	# Aloca 12 bytes na pilha
+	sw   $ra, 0($sp)	# Armazena o endere�o de retorno na pilha
+	sw   $a1, 4($sp)	# Armazena o endere�o da string 2 na pilha
+	sw   $s0, 8($sp)	# Armazena $s0 para uso neste subprograma
 	
+	jal  strlen		# Obt�m o tamanho da primeira string
+	move $s0, $v0		# Armazena o tamanho em $s0
+	
+	lw   $a0, 4($sp)	# Recupera a string 2 e a carrega em $a0
+	jal  strlen		# Obt�m o tamanho da segunda string
+	move $s1, $v0		# Armazena o resultado em $s1
+	
+	sgt  $t0, $s0, $s1	# Verifica se str1 � maior que str2	
+	slt  $t1, $s0, $s1	# Verifica se str1 � menor que str2
+	
+	beq  $t0, 1, str1_greater 	# Branch para str1_greater se str1 � maior
+	beq  $t1, 1, str1_lower		# Branch para str1_lower se str1 � menor
+	
+	b    equal		# �ltimo caso poss�vel, branch equal se nenhuma das duas condi��es anteriores for satisfeita
+	
+	str1_greater:
+		addi $v0, $zero, 1	# Se str1 for maior, retorna 1
+		b end			# Branch end
+	str1_lower:
+		addi $v0, $zero, -1	# Se str1 for menor, retorna -1
+		b end			# Branch end
+	equal:
+		addi $v0, $zero, 0	# Se forem igauis, retorna 0
+	end:
+		lw   $ra, 0($sp)	# Recupera o valor de retorno da fun��o
+		lw   $s0, 8($sp)	# Recupera o valor de $s0
+		addi $sp, $sp, 12	# Devolve os 12 bytes fornecidos pela pilha
+	
+		jr   $ra		# Retorna ao programa que o chamou
+
 
 # Subprograma:		exit
 # PropÃ³sito:		Finalizar o programa
