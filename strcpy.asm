@@ -1,10 +1,10 @@
-# Arquivo:		strcpy.asm
+# Arquivo:	strcpy.asm
 # Propósito: 	Copiar a string contida pelo endereço de origem para
-#				para o array apontado pelo endereço de destino
-# Autores: 		Higor Matheus da Costa Cordeiro, 
-#				Cauã Ferraz Bittencourt,
-#				João Guilherme Miranda de Sousa Bispo
-#				João Victor Mendonça Martins
+#		para o array apontado pelo endereço de destino
+# Autores: 	Higor Matheus da Costa Cordeiro, 
+#		Cauã Ferraz Bittencourt,
+#		João Guilherme Miranda de Sousa Bispo
+#		João Victor Mendonça Martins
 #
 # Pseudo Code
 # strcpy(string destination, string source, int strSize) {
@@ -17,7 +17,7 @@
 .text
 main:
 	# Imprimindo o prompt
-	la $a0, Prompt
+	la  $a0, Prompt
 	jal printString
 
 	# Inicializando um array com 256 bytes
@@ -34,7 +34,7 @@ main:
 	# Chamando a função strcpy como teste com o array Destino
 	la   $a0, Destino	# Definindo Destino como o endereço destino de strcpy
 	move $a1, $s0		# Definindo o endereço alocado como endereço origem de strcpy	 
-	jal  strcpy			# Chamando strcpy com os parâmetros definidos
+	jal  strcpy		# Chamando strcpy com os parâmetros definidos
 	move $s1, $v0
 	
 	# Imprime a mensagem de Output
@@ -57,9 +57,9 @@ main:
 
 # Subprograma:		strcpy
 # Propósito:		Copiar a string contida na origem para o endereço destino
-# Input:			$a0 - endereço de memória destino
-#					$a1 - endereço de memória origem
-# Retorno:			$v0 - endereço de memória destino
+# Input:		$a0 - endereço de memória destino
+#			$a1 - endereço de memória origem
+# Retorno:		$v0 - endereço de memória destino
 .text
 strcpy:
 	addi $sp, $sp, -8	# Alocando 8 bytes na pilha para armazenar endereço de retorno e $s0
@@ -71,14 +71,14 @@ strcpy:
 	move $s1, $a0	# Mantendo o endereço base da string de destino
 	
 	loop:
-		lb   $t0, 0($t1)			# Copia o primeiro caractere da origem em $t0
-		sne  $t3, $t0, $zero		# Compara o caractere com '\0' e guarda o booleano em $t3
+		lb   $t0, 0($t1)	# Copia o primeiro caractere da origem em $t0
+		sne  $t3, $t0, $zero	# Compara o caractere com '\0' e guarda o booleano em $t3
 		beqz $t3, end_strcpy  	# Se $t3 for igual a 0, branch para end_strcpy
-			sb   $t0, 0($s0)		# Armazena o caractere encontrado na string destino
+			sb   $t0, 0($s0)	# Armazena o caractere encontrado na string destino
 			addi $t1, $t1, 1	# Segue para o próximo caractere da origem
 			addi $s0, $s0, 1	# Segue para o próximo caractere do destino
 			
-		b loop		# Recomeça o loop
+		b loop			# Recomeça o loop
 		
 	end_strcpy:
 		addi $s0, $s0, 1	# Segue para o próximo espaço livre na memória
