@@ -179,6 +179,26 @@ comparaTamanhoComLimite:
 		jr $ra				# Retorna ao programa queo chamou
 
 
+# Subprograma: removeNewline
+# Propósito: Remover o caractere de nova linha de uma string, se presente
+# Input: $t0 - endereço da string
+.text
+removeNewline:
+    loop_remove:
+        lb $t1, 0($a0)      # Carrega o byte atual da string
+        beq $t1, $zero, end_remove # Se encontrar o final da string (NULL), terminar
+        beq $t1, 10, remove_char # Se encontrar o caractere de nova linha (ASCII 10), remover
+        addi $a0, $a0, 1    # Aponta para o próximo byte em $a0
+        b loop_remove       # Repete o loop até encontrar o NULL
+        
+    remove_char:
+        sb $zero, 0($a0)    # Substitui o caractere de nova linha por NULL
+        jr $ra              # Retorna para a função chamadora
+    
+    end_remove:
+        jr $ra              # Retorna para a função chamadora
+
+
 # Subprograma:		exit
 # PropÃ³sito:		Finalizar o programa
 # Input:			Não se aplica
