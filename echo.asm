@@ -1,3 +1,11 @@
+# Arquivo:		echo.asm
+# Proposito: 		Simular o echo no terminal MMIO
+# Autores: 		Higor Matheus da Costa Cordeiro, 
+#			Caua Ferraz Bittencourt,
+#			Joao Guilherme Miranda de Sousa Bispo
+#			Joao Victor Mendonca Martins
+
+
 .text
 main:
 	la $t0, 0xffff0004	# Armazena o endereco do Receiver Data Register
@@ -11,10 +19,10 @@ main:
 		andi $t4, $t4, 0x1	# Utiliza uma mascara 0x1 para isolar o bit ready
 		beqz $t4, read_char	# Se o bit ready estiver em 0, espera input
 		
-		lb   $t4, 0($t0)	# Se o bit ready for 1, lê o caractere digitado, que está salvo no Receiver Data Register
+		lb   $t4, 0($t0)	# Se o bit ready for 1, lÃª o caractere digitado, que estÃ¡ salvo no Receiver Data Register
 		sb   $t4, buffer	# Armazena o caractere no buffer
 	
-	# Aguarda até que o Transmitter esteja pronto
+	# Aguarda atÃ© que o Transmitter esteja pronto
 	wait_ready:
 		lw   $t4, 0($t3)	# Salva em $t4 o valor do Transmitter Control Register
 		andi $t4, $t4, 0x1	# Isola o bit ready do TCR
@@ -22,7 +30,7 @@ main:
 	
 	# Se o Transmitter estiver pronto, imprime o caractere no display
 	print_char:
-		lb   $t4, buffer	# Armazena o endereço do buffer em $t4
+		lb   $t4, buffer	# Armazena o endereÃ§o do buffer em $t4
 		sb   $t4, 0($t2)	# Arnazena o caractere no Transmitter Data Register para ser impresso
 		
 		b    read_char		# Reinicia o processo de leitura de caracteres
