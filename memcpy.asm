@@ -1,10 +1,10 @@
-# Arquivo: 		memcpy.asm
+# Arquivo: 	memcpy.asm
 # Propósito: 	Copiar o valor de n bytes do bloco de memória origem pro bloco de
-#				memória destino
-# Autores: 		Higor Matheus da Costa Cordeiro, 
-#				Cauã Ferraz Bittencourt,
-#				João Guilherme Miranda de Sousa Bispo
-#				João Victor Mendonça Martins
+#		memória destino
+# Autores: 	Higor Matheus da Costa Cordeiro, 
+#		Cauã Ferraz Bittencourt,
+#		João Guilherme Miranda de Sousa Bispo
+#		João Victor Mendonça Martins
 #
 # Pseudo Code
 # memcpy(string destination, string source, size num) {
@@ -17,42 +17,42 @@
 .text
 main:
 	# Imprimindo Prompt1
-	la $a0, Prompt1
+	la  $a0, Prompt1
 	jal printString
 	
 	# Ler a primeira String
-	li $v0, 8	# Lê uma String
-	la $a0, string1	# Coloca o endereço de a em $a0
-	li $a1, 50	# Define o tamanho max para 50
-	syscall		# Chama a syscall para ler a string
+	li  $v0, 8		# Lê uma String
+	la  $a0, string1	# Coloca o endereço de a em $a0
+	li  $a1, 50		# Define o tamanho max para 50
+	syscall			# Chama a syscall para ler a string
 	
 	# Imprimindo Prompt2
-	la $a0, Prompt2
+	la  $a0, Prompt2
 	jal printString
 	
 	# Ler a segunda String
-	li $v0, 8	# Lê uma String
-	la $a0, string2	# Coloca o endereço de b em $a0
-	li $a1, 50	# Define o tamanho max para 50
-	syscall		# Chama a syscall para ler a string
+	li  $v0, 8		# Lê uma String
+	la  $a0, string2	# Coloca o endereço de b em $a0
+	li  $a1, 50		# Define o tamanho max para 50
+	syscall			# Chama a syscall para ler a string
 	
 	# Imprimindo Prompt3
-	la $a0, Prompt3
+	la  $a0, Prompt3
 	jal printString
 	
 	# Ler num
-	li $v0, 5	# lê um inteiro
+	li  $v0, 5	# lê um inteiro
 	syscall
-	sw $v0, num
+	sw  $v0, num
 	
 	
-	la $a0, string1	# Adiciona o endereçø de a no primeiro argumento da funçao(destino)
-	la $a1, string2	# Adiciona o endereçø de a no segundo argumento da funçao(origem)
-	lw $a2, num	# Define quantos bytes serao copiados
-	jal memcpy	# Chama a funçãso
-	move $s0, $v0	# move o resultado($v0) para $s0
+	la   $a0, string1	# Adiciona o endereçø de a no primeiro argumento da funçao(destino)
+	la   $a1, string2	# Adiciona o endereçø de a no segundo argumento da funçao(origem)
+	lw   $a2, num		# Define quantos bytes serao copiados
+	jal  memcpy		# Chama a funçãso
+	move $s0, $v0		# move o resultado($v0) para $s0
 	
-	li $v0, 4	# Syscall para imprimir string
+	li   $v0, 4	# Syscall para imprimir string
 	move $a0, $s0	# Movendo resultado para o paramentro do syscall
 	syscall
 	
@@ -62,10 +62,10 @@ main:
 	Prompt1:	.asciiz "Digite a palavara que você deseja sobreescrever: "
 	Prompt2:	.asciiz "Digite a palavra que irá sobreescrever a original: "
 	Prompt3:	.asciiz "Digite quantos bytes serão sobreescritos: "
-	string1: 	.space 50
-	string2: 	.space 50
-	num:	 	.word 50
-	inputSize: 	256
+	string1: 	.space 	50
+	string2: 	.space 	50
+	num:	 	.word 	50
+	inputSize: 	.word 	256
 	
 
 # Subprograma:		memcpy
@@ -88,8 +88,8 @@ memcpy:					# Função principal
 	beqz $t1, memcpy_end	# Verifica se o número de byte é zero e caso for encerrar a função
 	
 	memcpy_copy_loop: 		# Loop para copiar os bytes para o destino
-		lb $t2, 0($t0)			# carregando o byte atual da origem em t2
-		sb $t2, 0($s0) 			# salvando o byte de t0 no byte de destino
+		lb   $t2, 0($t0)		# carregando o byte atual da origem em t2
+		sb   $t2, 0($s0) 		# salvando o byte de t0 no byte de destino
 		addi $s0, $s0, 1 		# Adiciona mais um ao ponteiro da origem
 		addi $t0, $t0, 1		# Adiciona mais um ao ponteiro de destino
 		subi $t1, $t1, 1		# Subtrai de num até chegar a zero e não restar mais bytes para copiar 
@@ -99,10 +99,10 @@ memcpy:					# Função principal
 		move $v0, $a0          # Retornar destination em $v0
 
    		 # Restaurar os registradores salvos
-   		lw $ra, 0($sp)         # Restaurar $ra do stack
-    		lw $s0, 4($sp)         # Restaurar $s0 do stack
-    		addi $sp, $sp, 8      # Liberar espaço no stack
+   		lw   $ra, 0($sp)	# Restaurar $ra do stack
+    		lw   $s0, 4($sp)	# Restaurar $s0 do stack
+    		addi $sp, $sp, 8	# Liberar espaço no stack
 
-   		jr $ra                 # Retornar para a função de chamada 
+   		jr   $ra                 # Retornar para a função de chamada 
 
 .include "utils.asm"
