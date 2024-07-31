@@ -46,8 +46,8 @@ main:
 	sw  $v0, num
 	
 	
-	la   $a0, string1	# Adiciona o endereçø de a no primeiro argumento da funçao(destino)
-	la   $a1, string2	# Adiciona o endereçø de a no segundo argumento da funçao(origem)
+	la   $a0, string1	# Adiciona o endereçø de a no primeiro argumento da funcao (destino)
+	la   $a1, string2	# Adiciona o endereçø de a no segundo argumento da funcao (origem)
 	lw   $a2, num		# Define quantos bytes serao copiados
 	jal  memcpy		# Chama a funçãso
 	move $s0, $v0		# move o resultado($v0) para $s0
@@ -58,10 +58,11 @@ main:
 	
 	jal exit
 
+
 .data
-	Prompt1:	.asciiz "Digite a palavara que você deseja sobreescrever: "
+	Prompt1:	.asciiz "Digite a palavra que você deseja sobreescrever: "
 	Prompt2:	.asciiz "Digite a palavra que irá sobreescrever a original: "
-	Prompt3:	.asciiz "Digite quantos bytes serão sobreescritos: "
+	Prompt3:	.asciiz "Digite quantos bytes serão sobrescritos: "
 	string1: 	.space 	50
 	string2: 	.space 	50
 	num:	 	.word 	50
@@ -70,13 +71,13 @@ main:
 
 # Subprograma:		memcpy
 # Propósito:		Copiar a quantidade de bytes especificada no bloco de memória destino
-# Input:			$a0 - endereço de memória destino
-#				$a1 - endereço de memória origem
-#				$a2 - quantidade de bytes (num)
-# Retorno:			$v0 - endereço de memória destino
+# Input:		$a0 - endereço de memória destino
+#			$a1 - endereço de memória origem
+#			$a2 - quantidade de bytes (num)
+# Retorno:		$v0 - endereço de memória destino
 .text
 memcpy:					# Função principal
-	# separa espaÃ§o na pilha para evitar sobreescriÃ§Ã£o
+	# separa espaco na pilha para evitar sobrescricao
 	addi $sp, $sp, -8	    	# Aloca espaco na pilha para o endereco de retorno e $s0
         sw   $ra, 0($sp)        	# Armazena o endereco de retorno da funcao para evitar sobreposicao
         sw   $s0, 4($sp)        	# Armazena $s0 
@@ -106,3 +107,4 @@ memcpy:					# Função principal
    		jr   $ra                 # Retornar para a função de chamada 
 
 .include "utils.asm"
+
