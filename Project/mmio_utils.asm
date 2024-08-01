@@ -13,6 +13,29 @@
 #	exit -			Encerra o programa
 
 
+# Subprograma:		clearBuffer
+# Proposito:		Limpar o buffer
+# Input:			Nao se aplica
+# Retorno:			Nao se aplica
+# Side effects:		Nao se aplica
+.text
+clearBuffer:
+    la  $t0, buffer			# Carrega o endereço do buffer em $t0
+    ori $t2, $zero, 256		# Carrega o tamanho do buffer em $t2
+    ori $t1, $zero, 0		# Inicializa o contador em 0
+    
+    # Laço de limpeza do buffer
+	clear:
+    	beq  $t1, $t2, end_clear 	# Se o contador atingir 256, encerrar
+    	sb   $zero, 0($t0)        	# Armazena zero no index do buffer
+    	addi $t0, $t0, 1        	# Avanca para o proximo caractere
+    	addi $t1, $t1, 1        	# Incrementa o contador
+    	b    clear                 	# Reinicia o loop
+    
+	end_clear:
+    	jr   $ra                  # Retorna para o programa que o chamou
+
+
 # Subprograma:		printString
 # Proposito:		Imprimir strings
 # Input:			$a0 - endereco da string a ser impressa
