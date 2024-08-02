@@ -10,6 +10,7 @@
 #	mmio_printString -		Imprime uma String
 #	printBanner -		Imprime o banner do shell
 #	getInput -		Recebe uma string como input
+#	getCommand -		Extrai o comando da string que foi enviada pelo usuario
 
 
 # Subprograma:		clearBuffer
@@ -19,11 +20,11 @@
 # Side effects:		Nao se aplica
 .text
 clearBuffer:
-    la  $t0, buffer			# Carrega o endereço do buffer em $t0
+    la  $t0, buffer			# Carrega o endereÃ§o do buffer em $t0
     ori $t2, $zero, 256		# Carrega o tamanho do buffer em $t2
     ori $t1, $zero, 0		# Inicializa o contador em 0
     
-    # Laço de limpeza do buffer
+    # LaÃ§o de limpeza do buffer
 	clear:
     	beq  $t1, $t2, end_clear 	# Se o contador atingir 256, encerrar
     	sb   $zero, 0($t0)        	# Armazena zero no index do buffer
@@ -138,6 +139,32 @@ getInput:
 		la   $v0, buffer	# Retorna o buffer em $v0
 	
 	jr   $ra		# Retorna para a funcao que o chamou
+	
+	
+# Subprograma:	getCommand
+# Proposito:	Extrair o comando da string de input
+# Input:	$a0 - Endereco da string a ser obtido o comando
+# Output:	$v0 - Endereço da string apos a extracao do comando
+# Side effects:	Nao se aplica
+getCommand:
+	la   $t0, buffer	# Armazena o endereco do buffer em $t0
+
+	# Loop de copia de caracteres ate encontrar o primeiro espaco ou '\0'
+	copy_loop:
+		lb   $t1, 0($a0)		# Carrega o primeiro caractere da string parametro
+		beqz $t1, endGetCommand 	# Se for o caractere nulo, finaliza o loop
+    		beq  $t1, 0x20, endGetCommand	# Se o caractere for o espaco, finaliza o loop
+    		sb   $t1, 0($t0)      		# Armazena o caractere no buffer
+		addi $t0, $t0, 1		# Incrementa o index do buffer
+		addi $a0, $a0, 1		# Incrementa o index da string parametro
+		
+		b copy_loop			# Reinicia o loop
+
+	endGetCommand:
+		sb   $zero, 0($t0)	# Adiciona o '\0' no final da string
+		la $v0, buffer		# Retorna a string apos a extracao do comando
+		
+	jr   $ra			# Retorna para a funcao que o chamou
 	
 
 # Secao de dados estaticos para o armazenamento do buffer
