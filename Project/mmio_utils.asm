@@ -7,10 +7,9 @@
 #				Joao Victor Mendonca Martins
 #
 # Index de Subprogramas:
-#	printString -		Imprime uma String
+#	mmio_printString -		Imprime uma String
 #	printBanner -		Imprime o banner do shell
 #	getInput -		Recebe uma string como input
-#	exit -			Encerra o programa
 
 
 # Subprograma:		clearBuffer
@@ -42,7 +41,7 @@ clearBuffer:
 # Retorno:			Nao se aplica
 # Side effects:		A string passada como argumento e impressa
 .text
-printString:
+mmio_printString:
     addi $sp, $sp, -4	# Aloca 4 bytes na pilha
     sw   $ra, 0($sp)	# Armazena o valor de retorno da funcao
 
@@ -79,7 +78,7 @@ printBanner:
 	sw   $ra, 0($sp)	# Armazena o endereco de retorno da funcao na pilha
 	
 	la   $a0, banner	# Armazena o endereco da string de banner como argumento de printString
-	jal  printString	# Chama a funcao de impressao de strings
+	jal  mmio_printString	# Chama a funcao de impressao de strings
 	
 	lw   $ra, 0($sp)	# Recupera o endereco de retorno da funcao
 	addi $sp, $sp, 4	# Devolve os 4 bytes alocados a pilha
@@ -144,17 +143,6 @@ getInput:
 # Secao de dados estaticos para o armazenamento do buffer
 .data
 	buffer:	.space 256
-
-
-# Subprograma:		exit
-# Proposito:		Encerrar o programa
-# Input:			Nao se aplica
-# Retorno:			Nao se aplica
-# Side effects:		A string passada como argumento e impressa
-.text
-exit:
-	ori $v0, $zero, 10	# Servico 10 indica encerramento de programa
-	syscall
 
 
 # Secao de memoria estatica para armazenamento dos enderecos dos MMIO

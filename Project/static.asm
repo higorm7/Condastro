@@ -17,4 +17,4 @@
 	cmd_8: 			.asciiz "salvar"
 	cmd_9: 			.asciiz "recarregar"
 	cmd_10: 		.asciiz "formatar"
-	invalid_cmd: 	.asciiz "Comando invalido"
+	invalid_cmd: 	.asciiz "Comando invalido\n"
