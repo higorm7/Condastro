@@ -4,7 +4,9 @@ main:
 		# Bloco de impressao do banner e obtencao de input
 		jal  printBanner	# Imprime o banner
 		jal  getInput		# Obtem o comando do usuario
-		move $a0, $v0		# Armazena o input em $a0, para ser usado como parametro de removeNewLine
+		move $s1, $v0		# Armazena o input em $s1
+	
+		move $a0, $s1		# Armazena o input em $a0, para ser usado como parametro de getCommand
 		jal  getCommand		# Obtem o comando apos o input
 		move $s0, $v0		# Armazena o comando em $s0
 		
@@ -90,7 +92,7 @@ main:
 		
 		addMorador:
 			li $v0, 4
-			la $a0, cmd_1
+			move $a0, $s1
 			syscall
 			
 			b restart
@@ -162,7 +164,7 @@ main:
 			b end_exec
 		
 		error:
-			la $a0, invalid_cmd
+			la  $a0, invalid_cmd
 			jal mmio_printString
 		
 		restart:
@@ -175,4 +177,3 @@ main:
 .include "mmio_utils.asm"
 .include "static.asm"
 .include "utils/utils.asm"
-

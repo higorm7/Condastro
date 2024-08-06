@@ -106,7 +106,13 @@ getInput:
 	lw   $t1, receiver_data		# Armazena o endereco do registrador de dados do teclado em $t1
 	lw   $t2, transmitter_control	# Armazena o endereco do registrador de controle do display em $t2
 	lw   $t3, transmitter_data	# Armazena o endereco do registrador de dados do display em $t3
-	la   $t4, buffer		# Armazena o endereco do buffer em $t4
+	
+	# Alocação de memória para o comando
+	li   $a0, 100		# Aloca 100 bytes para o comando
+	ori  $v0, $zero, 9	# Servico 9 indica alocacao de memoria
+	syscall				# Realiza a alocacao
+	move $t4, $v0		# Armazena a referencia em $t4. $t4 sera usado para manipulacao do index da referencia
+	move $t7, $t4		# $t7 mantem a referencia base da memoria alocada
 	
 	# Bloco de leitura do caractere
 	read_char:
@@ -136,7 +142,7 @@ getInput:
 	end_input: 
 		lw   $ra, 0($sp)	# Recupera o endereco de retorno da funcao
 		addi $sp, $sp, 4	# Devolve os 4 bytes alocados da memoria
-		la   $v0, buffer	# Retorna o buffer em $v0
+		move $v0, $t7		# Retorna o buffer em $v0
 	
 	jr   $ra		# Retorna para a funcao que o chamou
 	
@@ -147,23 +153,40 @@ getInput:
 # Output:	$v0 - Endereço da string apos a extracao do comando
 # Side effects:	Nao se aplica
 getCommand:
-	la   $t0, buffer	# Armazena o endereco do buffer em $t0
+	addi $sp, $sp, -8	# Aloca 8 bytes na pilha para armazenamento de valores de registradores usados
+	sw   $s0, 0($sp)	# Armazena o valor de $s0
+	sw   $s1, 4($sp)	# Armazena o valor de $s1
+	
+	move $s0, $a0		# Salva $a0 em $s0 para manter o valor
+	li   $a0, 15		# Indica 15 bytes para alocação de memória
+	ori $v0, $zero, 9	# Servico 9 indica alocacao de memoria
+	syscall				# Aloca a memoria
+	move $t0, $v0		# Armazena o endereco alocado em $t0 para manipulacao
+	move $s1, $t0		# Copia o endereco base da memoria alocada em $s1
+	
 
-	# Loop de copia de caracteres ate encontrar o primeiro espaco ou '\0'
+	# Loop de copia de caracteres ate encontrar o primeiro espaco ou '\0' ou atingir 14 caracteres
+	li $t2, 0	# Inicializa o contador de caracteres em 0
+	
 	copy_loop:
-		lb   $t1, 0($a0)		# Carrega o primeiro caractere da string parametro
-		beqz $t1, endGetCommand 	# Se for o caractere nulo, finaliza o loop
-    		beq  $t1, 0x20, endGetCommand	# Se o caractere for o espaco, finaliza o loop
-    		sb   $t1, 0($t0)      		# Armazena o caractere no buffer
-		addi $t0, $t0, 1		# Incrementa o index do buffer
-		addi $a0, $a0, 1		# Incrementa o index da string parametro
+		lb   $t1, 0($s0)				# Carrega o primeiro caractere da string parametro
+		beqz $t1, endGetCommand 		# Se for o caractere nulo, finaliza o loop
+    	beq  $t1, 0x20, endGetCommand	# Se o caractere for o espaco, finaliza o loop
+    	bge  $t2, 14, endGetCommand		# Se houver mais que 14 caracteres, finaliza o loop
+    	sb   $t1, 0($t0)      			# Armazena o caractere no buffer
+		addi $t0, $t0, 1				# Incrementa o index do buffer
+		addi $s0, $s0, 1				# Incrementa o index da string parametro
+		addi $t2, $t2, 1				# Incrementa o contador de caracteres
 		
 		b copy_loop			# Reinicia o loop
 
 	endGetCommand:
-		sb   $zero, 0($t0)	# Adiciona o '\0' no final da string
-		la $v0, buffer		# Retorna a string apos a extracao do comando
-		
+		sb   $zero, 1($t0)	# Adiciona o '\0' no final da string
+		move $v0, $s1		# Retorna a string apos a extracao do comando
+	
+	lw   $s0, 0($sp)	# Recupera o valor de $s0 da pilha
+	lw   $s1, 4($sp)	# Recupera o valor de $s1 da pilha
+	addi $sp, $sp, 8	# Devolve a memoria alocada a pilha
 	jr   $ra			# Retorna para a funcao que o chamou
 	
 	
@@ -179,61 +202,80 @@ getOptions:
 	sw   $s0, 4($sp)	# Armazena o valor de s0 na pilha
 
 	move $t0, $a0		# Armazena a string de comando no $t0
-	la   $s0, options	# Armazena o endereco de options em $s0
-	
+	la   $s7, options	# Armazena o endereco de options em $s7
+
+	# Incrementa o index de armazenamento da option
+	takeOption:
+		move $s0, $s7	# Recebe o novo index de armazenamento da option
+		
 	# Loop para encontrar o prefixo " --" nas options
 	loopFindPrefix:
 		lb   $t1, 0($t0)		# Carrega o primeiro caractere da string
 		beqz $t1, endGetOptions	# Se for o caractere nulo, finaliza
-		
-		seq  $t1, $t1, 0x20		# Se o caractere for igual a espaço, retorna 1
-		beqz $t1, restart		# Se não for, recomeça o loop
 	
+		seq  $t1, $t1, 0x20		# Se o caractere for igual a espaço, retorna 1
+		beqz $t1, restart_take		# Se não for, recomeça o loop
+
 		lb   $t2, 1($t0)		# Carrega o próximo caractere
 		seq  $t2, $t2, 0x2d		# Se o caractere for igual a '-', retorna 1
-	
+
 		and  $t1, $t1, $t2		# Se os dois forem os caracteres desejados, retorna 1
-		beqz $t1, restart		# Se não forem, recomeça o loop
-	
+		beqz $t1, restart_take	# Se não forem, recomeça o loop
+
 		lb   $t2, 2($t0)		# Carrega o próximo caractere
 		seq  $t2, $t2, 0x2d		# Se o caractere for igual a '-', retorna 1
-	
+
 		and  $t1, $t1, $t2		# Se os três forem os caracteres desejados, retorna 1
 		bnez $t1, equal			# Se forem os caracteres desejados, finaliza o loop
-	
+
 	# Reinicio do loop
-	restart:
+	restart_take:
 		addi $t0, $t0, 1		# Incrementa o index da string
 		b    loopFindPrefix		# Recomeça o loop
-	
+
 	# Incremento do index da string apos encontrar o prefixo
 	equal:
 		addi $t0, $t0, 3		# Se for encontrado o " --", incrementar em 3 o index da string e começar a extrair
-	
+		li   $t2, 0				# Inicializa contador de caracteres (mais que 24 encerra o loop)
+
 	# Armazena os caracteres encontrados em options	
 	get:
 		lb  $t1, 0($t0)        			# Carrega o caractere apos encontrar o " --"
 		beq $t1, $zero, end_getting		# Se for o caractere nulo, encerra o loop
 		beq $t1, 0x20, end_getting    	# Se for um espaco, encerra o loop
+		beq $t1, 0x2d, errorOptions			# Se encontrar um '-' retorna um erro de opções inválidas
+		beq $t2, 24, end_getting		# Se a quantidade de caracteres for 24, encerra o loop
 
 		sb   $t1, 0($s0)		# Armazena o caractere em $s0
 		addi $s0, $s0, 1      	# Incrementa o index de options
 		addi $t0, $t0, 1		# Incrementa o index da string
+		addi $t2, $t2, 1		# Incrementa o contador de caracteres
 
 		b    get				# Extrai os caracteres ate encontrar um espaco ou fim de string
-	
+
 	# Finaliza o processo de obtencao de options
 	end_getting:
-		b    loopFindPrefix		# Recomeca o processo de encontrar options
-	
+		addi $s7, $s7, 25	# Incrementa o index de options em 25 para obtenção da próxima option
+		b    takeOption		# Recomeca o processo de encontrar options
+
 	# Encerra e retorna ao programa
 	endGetOptions:
 		lw   $ra, 0($sp)	# Recupera o valor de $ra na pilha
 		lw   $s0, 4($sp)	# Recupera o valor de $s0 na pilha
 		addi $sp, $sp, 8	# Devolve a pilha a memoria alocada
-	
+
 		la   $v0, options	# Retorna o endereco de options 
 		jr 	 $ra			# Retorna a funcao que o chamou
+		
+	errorOptions:
+		la  $a0, invalidOptions	# Recebe o endereço de invalidOptions para impressão
+		jal mmio_printString	# Imprime a string de erro
+		jr  $ra					# Retorna ao programa
+		
+		
+# Secao de memoria para armazenar a string de erro de opcoes
+.data
+	invalidOptions:	.asciiz "Erro: opções inválidas."
 		
 		
 # Secao de memoria estatica para uso em getOptions		

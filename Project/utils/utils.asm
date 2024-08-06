@@ -81,10 +81,11 @@ strlen:
 # Side effects:	Nao se aplica
 .text
 comparaTamanho:
-	addi $sp, $sp, -12 	# Aloca 12 bytes na pilha
+	addi $sp, $sp, -16 	# Aloca 16 bytes na pilha
 	sw   $ra, 0($sp)	# Armazena o endereco de retorno na pilha
 	sw   $a1, 4($sp)	# Armazena o endereco da string 2 na pilha
 	sw   $s0, 8($sp)	# Armazena $s0 para uso neste subprograma
+	sw   $s1, 12($sp)	# Armazena $s1 para uso neste subprograma
 	
 	jal  strlen		# Obtem o tamanho da primeira string
 	move $s0, $v0		# Armazena o tamanho em $s0
@@ -99,7 +100,7 @@ comparaTamanho:
 	beq  $t0, 1, str1_greater 	# Branch para str1_greater se str1 for maior
 	beq  $t1, 1, str1_lesser	# Branch para str1_lesser se str1 for menor
 	
-	b    equal		# ultimo caso possivel, branch equal se nenhuma das duas condicoes anteriores for satisfeita
+	b    equal_strs		# ultimo caso possivel, branch equal se nenhuma das duas condicoes anteriores for satisfeita
 	
 	str1_greater:
 		addi $v0, $zero, 1		# Se str1 for maior, retorna 1
@@ -107,12 +108,13 @@ comparaTamanho:
 	str1_lesser:
 		addi $v0, $zero, -1		# Se str1 for menor, retorna -1
 		b end_compara_tamanho	# Branch end
-	equal:
+	equal_strs:
 		addi $v0, $zero, 0	# Se forem iguais, retorna 0
 	end_compara_tamanho:
 		lw   $ra, 0($sp)	# Recupera o valor de retorno da funcao
 		lw   $s0, 8($sp)	# Recupera o valor de $s0
-		addi $sp, $sp, 12	# Devolve os 12 bytes fornecidos pela pilha
+		lw   $s1, 12($sp)	# Recupera o valor de $s1
+		addi $sp, $sp, 16	# Devolve os 12 bytes fornecidos pela pilha
 	
 		jr   $ra		# Retorna ao programa que o chamou
 
