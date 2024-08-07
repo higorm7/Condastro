@@ -5,6 +5,9 @@ main:
 		jal  printBanner	# Imprime o banner
 		jal  getInput		# Obtem o comando do usuario
 		move $s1, $v0		# Armazena o input em $s1
+		move $a0, $s1		# Passa o input como parametro para removeNewline
+		jal removeNewline	# Remove o caractere de newLine
+		move $s1, $v0		# Armazena o valor em $s1
 	
 		move $a0, $s1		# Armazena o input em $a0, para ser usado como parametro de getCommand
 		jal  getCommand		# Obtem o comando apos o input
@@ -16,7 +19,7 @@ main:
 		# Case addMorador:
 		move $a0, $s0		# Passa a string como parametro para strcmp		
 		la   $a1, cmd_1		# Passa o comando 1 como parametro para strcmp
-		jal  strcmp		# Compara as strings
+		jal  strcmp			# Compara as strings
 		move $t0, $v0		# Se forem iguais, $v0 retorna 0
 		beqz $t0, addMorador	# Se v0 retornar 0, jump para addMorador
 		
@@ -99,10 +102,16 @@ main:
 			jal  getOptions		# Obtem as options
 			move $s2, $v0		# Armazena o endereco das options em $s2
 			
-			move $a0, $s2				# Utiliza o endereco das options como parametro para countOptions
-			jal  countOptions			# Conta a quantidade de options
-			move $t0, $v0				# Armazena em $t0 a quantidade de options
+			move $a0, $s2						# Utiliza o endereco das options como parametro para countOptions
+			jal  countOptions					# Conta a quantidade de options
+			move $t0, $v0						# Armazena em $t0 a quantidade de options
 			bne  $t0, 2, errorInvalidOptions	# Se houver mais que duas options, imprime erro de Options
+			
+			move $a0, $s2
+			jal  optionToInt
+			move $a0, $v0
+			li $v0, 1
+			syscall
 			
 			b restart
 			

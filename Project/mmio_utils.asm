@@ -327,7 +327,9 @@ optionToInt:
 	# Loop de conversao de caracteres em inteiros
 	convertLoop:
 		lb   $t0, 0($a0)		# Obtem o caractere de option
+		
 		beqz $t0, endConvert	# Se for o caractere nulo, finaliza o loop
+		beq  $t0, 0x20, endConvert	# Se o caractere for um espaco, finaliza o loop
 		
 		subi $t0, $t0, 48			# 48 = '0' em ASCII, remove o valor de $t0
 		blt  $t0, 0, invalidDigit	# Se o caractere for menor que 0, indica digito invalido
@@ -346,7 +348,7 @@ optionToInt:
 		jr   $ra		# Retorna a funcao que o chamou
 		
 	invalidDigit:
-		move $v0, $zero	# Retorna 0 se houver digitos invalidos
+		li $v0, 0		# Retorna 0 se houver digitos invalidos
 		jr $ra			# Retorna a funcao
 		
 		
