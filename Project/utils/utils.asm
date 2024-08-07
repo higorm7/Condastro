@@ -1,5 +1,5 @@
 # Arquivo:	utils.asm
-# PropÃƒÂ³sito: 	Fornecer utilitarios comuns para implementacao nas
+# PropÃƒÆ’Ã‚Â³sito: 	Fornecer utilitarios comuns para implementacao nas
 #		funcoes solicitadas.
 # Autores: 	Higor Matheus da Costa Cordeiro, 
 #		Caua Ferraz Bittencourt,
@@ -29,7 +29,7 @@ printString:
 
 
 # Subprograma:		printInt
-# PropÃƒÂ³sito:		Imprimir inteiros
+# Proposito:		Imprimir inteiros
 # Input:		$a0 - endereco do inteiro a ser impresso
 # Retorno:		Nao se aplica
 # Side effects:		O inteiro passado como argumento e impresso
@@ -42,7 +42,7 @@ printInt:
 
 
 # Subprograma:		strlen
-# PropÃƒÆ’Ã‚Â³sito:		Contar a quantidade de caracteres numa string
+# Proposito:		Contar a quantidade de caracteres numa string
 # Input:		$a0 - Endereco da string alvo
 # Retorno:		$v0 - Quantidade de caracteres na string
 # Side effects:		Nao se aplicam
@@ -60,7 +60,7 @@ strlen:
 		sne  $t2, $t1, $zero		# Compara o caractere em $t1 com '\0' e salva o booleano em $t2
 		beqz $t2, strlen_end		# Se $t2 for zero, branch para strlen_end
 			addi $s0, $s0, 1		# Adiciona o contador da string
-			addi $t0, $t0, 1		# Adiciona 1 byte ao endereÃƒÆ’Ã‚Â§o contido em $t0: 
+			addi $t0, $t0, 1		# Adiciona 1 byte ao endereÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o contido em $t0: 
 							# segue para o proximo caractere
 		b strlen_loop			# Recomeca o loop
 		
@@ -143,7 +143,7 @@ removeNewline:
         
         
 # Subprograma:	strcmp
-# Prop�sito:	Comparar duas strings
+# Propï¿½sito:	Comparar duas strings
 # Input:	$a0 - endereco da string 1
 #		$a1 - endereco da string 2
 # Retorno:	$v0 - valor de comparacao:
@@ -202,7 +202,7 @@ strcmp:
 
 
 # Subprograma:		exit
-# PropÃƒÆ’Ã‚Â³sito:		Finalizar o programa
+# Proposito:		Finalizar o programa
 # Input:		Nao se aplica
 # Retorno:		Nao se aplica
 # Side effects:		Encerra o programa
