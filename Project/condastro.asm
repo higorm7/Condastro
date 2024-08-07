@@ -93,63 +93,85 @@ main:
 		# Default:
 		b error			# Branch para Comando Invalido
 		
+		# Bloco de addMorador
 		addMorador:
-			move $a0, $s1	# Utiliza a string de comando como parametro para getOptions
-			jal  getOptions	# Obtem as options
-			move $s2, $v0	# Armazena o endereco das options em $s2
+			move $a0, $s1		# Utiliza a string de comando como parametro para getOptions
+			jal  getOptions		# Obtem as options
+			move $s2, $v0		# Armazena o endereco das options em $s2
 			
-			move $a0, $s2		# Utiliza o endereco das options como parametro para countOptions
-			jal  countOptions	# Conta a quantidade de options
-			move $s6, $v0		# Armazena em $t0 a quantidade de options
-			
-			move $a0, $s6
-			li $v0, 1
-			syscall
-			
-			bne $s6, 2, errorInvalidOptions
-			
-			la $a0, options
-			addi $a0, $a0, 25
-			li $v0, 4
-			syscall
+			move $a0, $s2				# Utiliza o endereco das options como parametro para countOptions
+			jal  countOptions			# Conta a quantidade de options
+			move $t0, $v0				# Armazena em $t0 a quantidade de options
+			bne  $t0, 2, errorInvalidOptions	# Se houver mais que duas options, imprime erro de Options
 			
 			b restart
 			
+		# Bloco de rmvMorador
 		rmvMorador:
-			li $v0, 4
-			la $a0, cmd_2
-			syscall
+			move $a0, $s1		# Utiliza a string de comando como parametro para getOptions
+			jal  getOptions		# Obtem as options
+			move $s2, $v0		# Armazena o endereco das options em $s2
+			
+			move $a0, $s2				# Utiliza o endereco das options como parametro para countOptions
+			jal  countOptions			# Conta a quantidade de options
+			move $t0, $v0				# Armazena em $t0 a quantidade de options
+			bne  $t0, 2, errorInvalidOptions	# Se houver mais que duas options, imprime erro de Options
 			
 			b restart
 			
+		# Bloco de addAuto
 		addAuto:
-			li $v0, 4
-			la $a0, cmd_3
-			syscall
+			move $a0, $s1		# Utiliza a string de comando como parametro para getOptions
+			jal  getOptions		# Obtem as options
+			move $s2, $v0		# Armazena o endereco das options em $s2
+			
+			move $a0, $s2				# Utiliza o endereco das options como parametro para countOptions
+			jal  countOptions			# Conta a quantidade de options
+			move $t0, $v0				# Armazena em $t0 a quantidade de options
+			bne  $t0, 4, errorInvalidOptions	# Se houver mais que quatro options, imprime erro de Options
 			
 			b restart
 			
+		# Bloco de rmvAuto
 		rmvAuto:
-			li $v0, 4
-			la $a0, cmd_4
-			syscall
+			move $a0, $s1		# Utiliza a string de comando como parametro para getOptions
+			jal  getOptions		# Obtem as options
+			move $s2, $v0		# Armazena o endereco das options em $s2
+			
+			move $a0, $s2				# Utiliza o endereco das options como parametro para countOptions
+			jal  countOptions			# Conta a quantidade de options
+			move $t0, $v0				# Armazena em $t0 a quantidade de options
+			bne  $t0, 2, errorInvalidOptions	# Se houver mais que duas options, imprime erro de Options
 			
 			b restart
 			
+		# Bloco de limparAp
 		limparAp:
-			li $v0, 4
-			la $a0, cmd_5
-			syscall
+			move $a0, $s1		# Utiliza a string de comando como parametro para getOptions
+			jal  getOptions		# Obtem as options
+			move $s2, $v0		# Armazena o endereco das options em $s2
+			
+			move $a0, $s2				# Utiliza o endereco das options como parametro para countOptions
+			jal  countOptions			# Conta a quantidade de options
+			move $t0, $v0				# Armazena em $t0 a quantidade de options
+			bne  $t0, 1, errorInvalidOptions	# Se houver mais que duas options, imprime erro de Options
 			
 			b restart
 			
+		# Bloco de infoAp
 		infoAp:
-			li $v0, 4
-			la $a0, cmd_6
-			syscall
+			move $a0, $s1		# Utiliza a string de comando como parametro para getOptions
+			jal  getOptions		# Obtem as options
+			move $s2, $v0		# Armazena o endereco das options em $s2
+			
+			move $a0, $s2				# Utiliza o endereco das options como parametro para countOptions
+			jal  countOptions			# Conta a quantidade de options
+			move $t0, $v0				# Armazena em $t0 a quantidade de options
+			bne  $t0, 1, errorInvalidOptions	# Se houver mais que duas options, imprime erro de Options
 			
 			b restart
 			
+		# Bloco de infoGeral
 		infoGeral:
 			li $v0, 4
 			la $a0, cmd_7
@@ -157,6 +179,7 @@ main:
 			
 			b restart
 			
+		# Bloco de salvar
 		salvar:
 			li $v0, 4
 			la $a0, cmd_8
@@ -164,6 +187,7 @@ main:
 			
 			b restart
 			
+		# Bloco de recarregar
 		recarregar:
 			li $v0, 4
 			la $a0, cmd_9
@@ -171,6 +195,7 @@ main:
 			
 			b restart
 			
+		# Bloco de formatar o arquivo
 		formatar:
 			li $v0, 4
 			la $a0, cmd_10
@@ -178,18 +203,22 @@ main:
 			
 			b restart
 			
+		# Finaliza o programa
 		finalizar:
 			b end_exec
 		
+		# Erro de comando inválido
 		error:
 			la  $a0, invalid_cmd
 			jal mmio_printString
 			b   restart
 			
+		# Erro de opções inválidas
 		errorInvalidOptions:
 			la  $a0, invalidOptions
 			jal mmio_printString
 		
+		# Reinicia o programa
 		restart:
 			jal clearOptions
 			b exec
