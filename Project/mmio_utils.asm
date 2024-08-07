@@ -7,7 +7,7 @@
 #				Joao Victor Mendonca Martins
 #
 # Index de Subprogramas:
-#	mmio_printString -		Imprime uma String
+#	mmio_printString -	Imprime uma String
 #	printBanner -		Imprime o banner do shell
 #	getInput -		Recebe uma string como input
 #	getCommand -		Extrai o comando da string que foi enviada pelo usuario
@@ -15,12 +15,12 @@
 
 # Subprograma:		clearBuffer
 # Proposito:		Limpar o buffer
-# Input:			Nao se aplica
-# Retorno:			Nao se aplica
+# Input:		Nao se aplica
+# Retorno:		Nao se aplica
 # Side effects:		Nao se aplica
 .text
 clearBuffer:
-    la  $t0, buffer			# Carrega o endereÃ§o do buffer em $t0
+    la  $t0, buffer		# Carrega o endereco do buffer em $t0
     ori $t2, $zero, 256		# Carrega o tamanho do buffer em $t2
     ori $t1, $zero, 0		# Inicializa o contador em 0
     
@@ -38,8 +38,8 @@ clearBuffer:
 
 # Subprograma:		printString
 # Proposito:		Imprimir strings
-# Input:			$a0 - endereco da string a ser impressa
-# Retorno:			Nao se aplica
+# Input:		$a0 - endereco da string a ser impressa
+# Retorno:		Nao se aplica
 # Side effects:		A string passada como argumento e impressa
 .text
 mmio_printString:
@@ -60,12 +60,12 @@ mmio_printString:
 
     sb   $t2, 0($t1)		# Envia p caractere lido ao registrador de dados
     addi $a0, $a0, 1		# Incrementa o endereco da string passada como parametro
-    b    print_loop			# Recomeca o loop
+    b    print_loop		# Recomeca o loop
 
 	end:
     	lw   $ra, 0($sp)	# Recupera o valor de retorno da funcao
     	addi $sp, $sp, 4	# Devolve os 4 bytes alocados a pilha
-    	jr   $ra			# Retorna a funcao que chamou
+    	jr   $ra		# Retorna a funcao que chamou
 
 
 # Subprograma:		printBanner
@@ -110,7 +110,7 @@ getInput:
 	# Alocação de memória para o comando
 	li   $a0, 100		# Aloca 100 bytes para o comando
 	ori  $v0, $zero, 9	# Servico 9 indica alocacao de memoria
-	syscall				# Realiza a alocacao
+	syscall			# Realiza a alocacao
 	move $t4, $v0		# Armazena a referencia em $t4. $t4 sera usado para manipulacao do index da referencia
 	move $t7, $t4		# $t7 mantem a referencia base da memoria alocada
 	
@@ -131,10 +131,10 @@ getInput:
 		
 	# Bloco de impressao do caractere recebido
 	print_char:
-		lb   $t5, 0($t4)	# Armazena o valor para imprimir em $t5
-		sb   $t5, 0($t3)	# Armazena o valor de impressao no registrador de dados do display e o imprime
+		lb   $t5, 0($t4)		# Armazena o valor para imprimir em $t5
+		sb   $t5, 0($t3)		# Armazena o valor de impressao no registrador de dados do display e o imprime
 		beq  $t5, 0x0a, end_input	# Se o caractere for igual a newLine, encerra o input
-		addi $t4, $t4, 1	# Incrementa o index do buffer
+		addi $t4, $t4, 1		# Incrementa o index do buffer
 	
 	
 	b  read_char	# Recomeca o loop
@@ -159,8 +159,8 @@ getCommand:
 	
 	move $s0, $a0		# Salva $a0 em $s0 para manter o valor
 	li   $a0, 15		# Indica 15 bytes para alocação de memória
-	ori $v0, $zero, 9	# Servico 9 indica alocacao de memoria
-	syscall				# Aloca a memoria
+	ori  $v0, $zero, 9	# Servico 9 indica alocacao de memoria
+	syscall			# Aloca a memoria
 	move $t0, $v0		# Armazena o endereco alocado em $t0 para manipulacao
 	move $s1, $t0		# Copia o endereco base da memoria alocada em $s1
 	
@@ -169,14 +169,14 @@ getCommand:
 	li $t2, 0	# Inicializa o contador de caracteres em 0
 	
 	copy_loop:
-		lb   $t1, 0($s0)				# Carrega o primeiro caractere da string parametro
-		beqz $t1, endGetCommand 		# Se for o caractere nulo, finaliza o loop
-    	beq  $t1, 0x20, endGetCommand	# Se o caractere for o espaco, finaliza o loop
-    	bge  $t2, 14, endGetCommand		# Se houver mais que 14 caracteres, finaliza o loop
-    	sb   $t1, 0($t0)      			# Armazena o caractere no buffer
-		addi $t0, $t0, 1				# Incrementa o index do buffer
-		addi $s0, $s0, 1				# Incrementa o index da string parametro
-		addi $t2, $t2, 1				# Incrementa o contador de caracteres
+		lb   $t1, 0($s0)		# Carrega o primeiro caractere da string parametro
+		beqz $t1, endGetCommand 	# Se for o caractere nulo, finaliza o loop
+    		beq  $t1, 0x20, endGetCommand	# Se o caractere for o espaco, finaliza o loop
+    		bge  $t2, 14, endGetCommand	# Se houver mais que 14 caracteres, finaliza o loop
+    		sb   $t1, 0($t0)      		# Armazena o caractere no buffer
+		addi $t0, $t0, 1		# Incrementa o index do buffer
+		addi $s0, $s0, 1		# Incrementa o index da string parametro
+		addi $t2, $t2, 1		# Incrementa o contador de caracteres
 		
 		b copy_loop			# Reinicia o loop
 
@@ -192,8 +192,8 @@ getCommand:
 	
 # Subprograma:		getOptions
 # Proposito:		Extrair as options de um comando
-# Input:			$a0 - String do comando
-# Retorno:			$v0 - endereco do array de Options
+# Input:		$a0 - String do comando
+# Retorno:		$v0 - endereco do array de Options
 # Side effects:		Nao se aplica
 .text
 getOptions:
@@ -211,7 +211,7 @@ getOptions:
 	# Loop para encontrar o prefixo " --" nas options
 	loopFindPrefix:
 		lb   $t1, 0($t0)		# Carrega o primeiro caractere da string
-		beqz $t1, endGetOptions	# Se for o caractere nulo, finaliza
+		beqz $t1, endGetOptions		# Se for o caractere nulo, finaliza
 	
 		seq  $t1, $t1, 0x20		# Se o caractere for igual a espaço, retorna 1
 		beqz $t1, restart_take		# Se não for, recomeça o loop
@@ -220,7 +220,7 @@ getOptions:
 		seq  $t2, $t2, 0x2d		# Se o caractere for igual a '-', retorna 1
 
 		and  $t1, $t1, $t2		# Se os dois forem os caracteres desejados, retorna 1
-		beqz $t1, restart_take	# Se não forem, recomeça o loop
+		beqz $t1, restart_take		# Se não forem, recomeça o loop
 
 		lb   $t2, 2($t0)		# Carrega o próximo caractere
 		seq  $t2, $t2, 0x2d		# Se o caractere for igual a '-', retorna 1
@@ -230,28 +230,28 @@ getOptions:
 
 	# Reinicio do loop
 	restart_take:
-		addi $t0, $t0, 1		# Incrementa o index da string
-		b    loopFindPrefix		# Recomeça o loop
+		addi $t0, $t0, 1	# Incrementa o index da string
+		b    loopFindPrefix	# Recomeça o loop
 
 	# Incremento do index da string apos encontrar o prefixo
 	equal:
-		addi $t0, $t0, 3		# Se for encontrado o " --", incrementar em 3 o index da string e começar a extrair
-		li   $t2, 0				# Inicializa contador de caracteres (mais que 24 encerra o loop)
+		addi $t0, $t0, 3	# Se for encontrado o " --", incrementar em 3 o index da string e começar a extrair
+		li   $t2, 0		# Inicializa contador de caracteres (mais que 24 encerra o loop)
 
 	# Armazena os caracteres encontrados em options	
 	get:
-		lb  $t1, 0($t0)        			# Carrega o caractere apos encontrar o " --"
-		beq $t1, $zero, end_getting		# Se for o caractere nulo, encerra o loop
+		lb  $t1, 0($t0)        		# Carrega o caractere apos encontrar o " --"
+		beq $t1, $zero, end_getting	# Se for o caractere nulo, encerra o loop
 		beq $t1, 0x20, end_getting    	# Se for um espaco, encerra o loop
-		beq $t1, 0x2d, errorOptions			# Se encontrar um '-' retorna um erro de opções inválidas
-		beq $t2, 24, end_getting		# Se a quantidade de caracteres for 24, encerra o loop
+		beq $t1, 0x2d, errorOptions	# Se encontrar um '-' retorna um erro de opções inválidas
+		beq $t2, 24, end_getting	# Se a quantidade de caracteres for 24, encerra o loop
 
-		sb   $t1, 0($s0)		# Armazena o caractere em $s0
+		sb   $t1, 0($s0)	# Armazena o caractere em $s0
 		addi $s0, $s0, 1      	# Incrementa o index de options
-		addi $t0, $t0, 1		# Incrementa o index da string
-		addi $t2, $t2, 1		# Incrementa o contador de caracteres
+		addi $t0, $t0, 1	# Incrementa o index da string
+		addi $t2, $t2, 1	# Incrementa o contador de caracteres
 
-		b    get				# Extrai os caracteres ate encontrar um espaco ou fim de string
+		b    get	# Extrai os caracteres ate encontrar um espaco ou fim de string
 
 	# Finaliza o processo de obtencao de options
 	end_getting:
@@ -265,12 +265,12 @@ getOptions:
 		addi $sp, $sp, 8	# Devolve a pilha a memoria alocada
 
 		la   $v0, options	# Retorna o endereco de options 
-		jr 	 $ra			# Retorna a funcao que o chamou
+		jr   $ra		# Retorna a funcao que o chamou
 		
 	errorOptions:
 		la  $a0, invalidOptions	# Recebe o endereço de invalidOptions para impressão
 		jal mmio_printString	# Imprime a string de erro
-		jr  $ra					# Retorna ao programa
+		jr  $ra			# Retorna ao programa
 		
 		
 # Secao de memoria para armazenar a string de erro de opcoes
