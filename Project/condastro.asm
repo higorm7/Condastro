@@ -8,7 +8,10 @@ main:
 	
 		move $a0, $s1		# Armazena o input em $a0, para ser usado como parametro de getCommand
 		jal  getCommand		# Obtem o comando apos o input
-		move $s0, $v0		# Armazena o comando em $s0
+		move $a0, $v0		# Armazena o comando em $s0
+		jal removeNewline	# Remove o caractere de nova linha do comando
+		move $s0, $v0		# Armazena o resultado em $s0
+		
 		
 		# Case addMorador:
 		move $a0, $s0		# Passa a string como parametro para strcmp		
@@ -91,8 +94,23 @@ main:
 		b error			# Branch para Comando Invalido
 		
 		addMorador:
+			move $a0, $s1	# Utiliza a string de comando como parametro para getOptions
+			jal  getOptions	# Obtem as options
+			move $s2, $v0	# Armazena o endereco das options em $s2
+			
+			move $a0, $s2		# Utiliza o endereco das options como parametro para countOptions
+			jal  countOptions	# Conta a quantidade de options
+			move $s6, $v0		# Armazena em $t0 a quantidade de options
+			
+			move $a0, $s6
+			li $v0, 1
+			syscall
+			
+			bne $s6, 2, errorInvalidOptions
+			
+			la $a0, options
+			addi $a0, $a0, 25
 			li $v0, 4
-			move $a0, $s1
 			syscall
 			
 			b restart
@@ -166,8 +184,14 @@ main:
 		error:
 			la  $a0, invalid_cmd
 			jal mmio_printString
+			b   restart
+			
+		errorInvalidOptions:
+			la  $a0, invalidOptions
+			jal mmio_printString
 		
 		restart:
+			jal clearOptions
 			b exec
 			
 	end_exec:
@@ -177,3 +201,4 @@ main:
 .include "mmio_utils.asm"
 .include "static.asm"
 .include "utils/utils.asm"
+
