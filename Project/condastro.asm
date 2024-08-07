@@ -109,14 +109,17 @@ main:
 			
 			move $a0, $s2						# Passa $s2 como parametro para optionToInt
 			jal  optionToInt					# Transforma o valor contido na primeira option em inteiro
-			move $t0, $v0						# Armazena o retorno em $t0
-			beqz $t0, errorInvalidOptions		# Se o retorno for igual a 0, houve erro de caracteres
+			move $s3, $v0						# Armazena o retorno em $s3
+			beqz $s3, errorInvalidOptions		# Se o retorno for igual a 0, houve erro de caracteres
 			
-			move $a0, $t0
+			move $a0, $s3
 			jal checkValidApartment
-			move $t0, $v0
+			move $t1, $v0
+			beqz $t1, errorInvalidApartment
 			
-			move $a0, $t0
+			move $a0, $s3
+			jal calculateApartAddress
+			move $a0, $v0
 			li $v0, 1
 			syscall
 			
@@ -223,13 +226,19 @@ main:
 		finalizar:
 			b end_exec
 		
-		# Erro de comando inválido
+		# Erro de comando invalido
 		error:
 			la  $a0, invalid_cmd
 			jal mmio_printString
 			b   restart
-			
-		# Erro de opções inválidas
+		
+		# Erro de apartamento invalido	
+		errorInvalidApartment:
+			la  $a0, invalid_apart
+			jal mmio_printString
+			b   restart
+		
+		# Erro de opcoes invalidas
 		errorInvalidOptions:
 			la  $a0, invalidOptions
 			jal mmio_printString
@@ -241,6 +250,11 @@ main:
 			
 	end_exec:
 		jal exit
+
+
+# Armazena os dados dos apartamentos
+.data
+	moradores:	.space 96		# Array para armazenar a quantidade de moradores (24 apartamentos, armazenando um inteiro (4 bytes))
 
 
 .include "mmio_utils.asm"

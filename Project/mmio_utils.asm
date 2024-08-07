@@ -383,4 +383,27 @@ checkValidApartment:
 		jr $ra			# Retorna a funcao que o chamou
 	
 	
+# Subprograma:		calculateApartAddress
+# Proposito:		Calcula o offset do apartamento
+# Input:			$a0 - numero do apartamento
+# Retorno:			$v0 - offset
+# Side effects:		Nao se aplica
+.text
+calculateApartAddress:
+	move $t0, $a0	# Armazena o valor de $a0 em $t0
 	
+	div  $t0, $t0, 100	# Obtem o andar do apartamento
+	mflo $t1			# Move o andar para t1
+	mfhi $t2			# Move o numero de apartamento para t2
+	
+	mul  $t1, $t1, 4	# Multiplica pelo tamanho do inteiro (4 bytes)
+	addi $t2, $t2, -1	# Decrementa o numero de apartamento
+	mul  $t2, $t2, 4	# Multiplica pelo tamanho do inteiro (4 bytes)
+	add  $t1, $t1, $t2	# Acumula os dois valores em $t1
+	
+	move $v0, $t1		# Retorna $t1 (offset)
+	jr   $ra			# Retorna para a funcao que o chamou
+	
+	
+
+
