@@ -313,3 +313,40 @@ countOptions:
 		
 	jr $ra	# Retorna a funcao que o chamou
 
+
+# Subprograma:		optionToInt
+# Proposito:		Converter uma option para inteiro
+# Input:			$a0 - endereco da option
+# Retorno:			$v0 - inteiro correspondente
+# Side effects:		Nao se aplica
+.text
+optionToInt:
+	li $t1, 0	# Inicializa o acumulador de valor
+	li $t2, 0	# Inicializa o contador de caracteres
+	
+	# Loop de conversao de caracteres em inteiros
+	convertLoop:
+		lb   $t0, 0($a0)		# Obtem o caractere de option
+		beqz $t0, endConvert	# Se for o caractere nulo, finaliza o loop
+		
+		subi $t0, $t0, 48			# 48 = '0' em ASCII, remove o valor de $t0
+		blt  $t0, 0, invalidDigit	# Se o caractere for menor que 0, indica digito invalido
+		bgt  $t0, 9, invalidDigit	# Se o caractere for maior que 9, indica digito invalido
+		
+		mul  $t1, $t1, 10		# Multiplica o acumulador por 10 a cada entrada de numero
+		add  $t1, $t1, $t0		# Adiciona o numero que acabou de ser lido
+		
+		addi $a0, $a0, 1	# Incrementa o contador da option
+		addi $t2, $t2, 1	# Incrementa o contador de caracteres
+		
+		bne  $t2, 4, convertLoop		# Se houver menos que 4 caracteres lidos, reinicia o loop
+	
+	endConvert:
+		move $v0, $t1	# Retorna o inteiro lido
+		jr   $ra		# Retorna a funcao que o chamou
+		
+	invalidDigit:
+		move $v0, $zero	# Retorna 0 se houver digitos invalidos
+		jr $ra			# Retorna a funcao
+		
+		
