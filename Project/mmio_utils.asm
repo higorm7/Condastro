@@ -317,7 +317,7 @@ countOptions:
 # Subprograma:		optionToInt
 # Proposito:		Converter uma option para inteiro
 # Input:			$a0 - endereco da option
-# Retorno:			$v0 - inteiro correspondente
+# Retorno:			$v0 - inteiro correspondente (Retorno = 0 se houver caracteres invalidos)
 # Side effects:		Nao se aplica
 .text
 optionToInt:
@@ -351,4 +351,36 @@ optionToInt:
 		li $v0, 0		# Retorna 0 se houver digitos invalidos
 		jr $ra			# Retorna a funcao
 		
-		
+	
+# Subprograma:		checkValidApartment
+# Proposito:		Verifica se um apartamento e valido
+# Input:			$a0 - numero do apartament0
+# Retorno:			$v0 - 1, se o apartamento for valido
+#						  0, se for invalido
+# Side effects:		Nao se aplica	
+.text
+checkValidApartment:	
+	move $t0, $a0		# Armazena o valor de $a0 em $t0
+	div  $t0, $t0, 100	# Encontra o andar do apartamento
+	mflo $t0			# Move o quociente para $t0
+	mfhi $t1			# Move o resto para $t1
+	
+	blt $t0, 0, invalid		# Se o andar for menor que 0, jump para invalido
+	bgt $t0, 12, invalid	# Se o andar for maior que 12, jump para invalido
+	blt $t1, 1, invalid		# Se o numero de apartamento for menor que 1, jump para invalido
+	bgt $t1, 2, invalid		# Se o numero de apartamento for maior que 2, jump para invalido
+	
+	# Caso valido, retorna 1
+	valid:
+		li $v0, 1	# Armazena 1 no endereco de retorno
+		b endCheck	# Finaliza o subprograma
+	
+	# Retorna 0 se invalido
+	invalid:
+		move $v0, $zero	# Armazena 0 no endereco de retorno
+	
+	endCheck:
+		jr $ra			# Retorna a funcao que o chamou
+	
+	
+	

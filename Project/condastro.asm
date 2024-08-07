@@ -107,9 +107,16 @@ main:
 			move $t0, $v0						# Armazena em $t0 a quantidade de options
 			bne  $t0, 2, errorInvalidOptions	# Se houver mais que duas options, imprime erro de Options
 			
-			move $a0, $s2
-			jal  optionToInt
-			move $a0, $v0
+			move $a0, $s2						# Passa $s2 como parametro para optionToInt
+			jal  optionToInt					# Transforma o valor contido na primeira option em inteiro
+			move $t0, $v0						# Armazena o retorno em $t0
+			beqz $t0, errorInvalidOptions		# Se o retorno for igual a 0, houve erro de caracteres
+			
+			move $a0, $t0
+			jal checkValidApartment
+			move $t0, $v0
+			
+			move $a0, $t0
 			li $v0, 1
 			syscall
 			
