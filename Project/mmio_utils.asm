@@ -13,20 +13,20 @@
 #	getCommand -		Extrai o comando da string que foi enviada pelo usuario
 
 
-# Subprograma:		clearBuffer
-# Proposito:		Limpar o buffer
+# Subprograma:		clearOptions
+# Proposito:		Limpar as Options
 # Input:		Nao se aplica
 # Retorno:		Nao se aplica
 # Side effects:		Nao se aplica
 .text
-clearBuffer:
-    la  $t0, buffer		# Carrega o endereco do buffer em $t0
-    ori $t2, $zero, 256		# Carrega o tamanho do buffer em $t2
+clearOptions:
+    la  $t0, options		# Carrega o endereco do buffer em $t0
+    ori $t2, $zero, 150		# Carrega o tamanho do buffer em $t2
     ori $t1, $zero, 0		# Inicializa o contador em 0
     
-    # LaÃ§o de limpeza do buffer
+    # LaÃƒÂ§o de limpeza do buffer
 	clear:
-    	beq  $t1, $t2, end_clear 	# Se o contador atingir 256, encerrar
+    	beq  $t1, $t2, end_clear 	# Se o contador atingir 150, encerrar
     	sb   $zero, 0($t0)        	# Armazena zero no index do buffer
     	addi $t0, $t0, 1        	# Avanca para o proximo caractere
     	addi $t1, $t1, 1        	# Incrementa o contador
@@ -107,7 +107,7 @@ getInput:
 	lw   $t2, transmitter_control	# Armazena o endereco do registrador de controle do display em $t2
 	lw   $t3, transmitter_data	# Armazena o endereco do registrador de dados do display em $t3
 	
-	# Alocação de memória para o comando
+	# AlocaÃ§Ã£o de memÃ³ria para o comando
 	li   $a0, 100		# Aloca 100 bytes para o comando
 	ori  $v0, $zero, 9	# Servico 9 indica alocacao de memoria
 	syscall			# Realiza a alocacao
@@ -150,7 +150,7 @@ getInput:
 # Subprograma:	getCommand
 # Proposito:	Extrair o comando da string de input
 # Input:	$a0 - Endereco da string a ser obtido o comando
-# Output:	$v0 - Endereço da string apos a extracao do comando
+# Output:	$v0 - EndereÃ§o da string apos a extracao do comando
 # Side effects:	Nao se aplica
 getCommand:
 	addi $sp, $sp, -8	# Aloca 8 bytes na pilha para armazenamento de valores de registradores usados
@@ -158,7 +158,7 @@ getCommand:
 	sw   $s1, 4($sp)	# Armazena o valor de $s1
 	
 	move $s0, $a0		# Salva $a0 em $s0 para manter o valor
-	li   $a0, 15		# Indica 15 bytes para alocação de memória
+	li   $a0, 15		# Indica 15 bytes para alocaÃ§Ã£o de memÃ³ria
 	ori  $v0, $zero, 9	# Servico 9 indica alocacao de memoria
 	syscall			# Aloca a memoria
 	move $t0, $v0		# Armazena o endereco alocado em $t0 para manipulacao
@@ -213,29 +213,29 @@ getOptions:
 		lb   $t1, 0($t0)		# Carrega o primeiro caractere da string
 		beqz $t1, endGetOptions		# Se for o caractere nulo, finaliza
 	
-		seq  $t1, $t1, 0x20		# Se o caractere for igual a espaço, retorna 1
-		beqz $t1, restart_take		# Se não for, recomeça o loop
+		seq  $t1, $t1, 0x20		# Se o caractere for igual a espaco, retorna 1
+		beqz $t1, restart_take		# Se nao for, recomeca o loop
 
-		lb   $t2, 1($t0)		# Carrega o próximo caractere
+		lb   $t2, 1($t0)		# Carrega o prÃ³ximo caractere
 		seq  $t2, $t2, 0x2d		# Se o caractere for igual a '-', retorna 1
 
 		and  $t1, $t1, $t2		# Se os dois forem os caracteres desejados, retorna 1
-		beqz $t1, restart_take		# Se não forem, recomeça o loop
+		beqz $t1, restart_take		# Se nao forem, recomeca o loop
 
-		lb   $t2, 2($t0)		# Carrega o próximo caractere
+		lb   $t2, 2($t0)		# Carrega o prÃ³ximo caractere
 		seq  $t2, $t2, 0x2d		# Se o caractere for igual a '-', retorna 1
 
-		and  $t1, $t1, $t2		# Se os três forem os caracteres desejados, retorna 1
+		and  $t1, $t1, $t2		# Se os trÃªs forem os caracteres desejados, retorna 1
 		bnez $t1, equal			# Se forem os caracteres desejados, finaliza o loop
 
 	# Reinicio do loop
 	restart_take:
 		addi $t0, $t0, 1	# Incrementa o index da string
-		b    loopFindPrefix	# Recomeça o loop
+		b    loopFindPrefix	# Recomeca o loop
 
 	# Incremento do index da string apos encontrar o prefixo
 	equal:
-		addi $t0, $t0, 3	# Se for encontrado o " --", incrementar em 3 o index da string e começar a extrair
+		addi $t0, $t0, 3	# Se for encontrado o " --", incrementar em 3 o index da string e comecar a extrair
 		li   $t2, 0		# Inicializa contador de caracteres (mais que 24 encerra o loop)
 
 	# Armazena os caracteres encontrados em options	
@@ -243,7 +243,6 @@ getOptions:
 		lb  $t1, 0($t0)        		# Carrega o caractere apos encontrar o " --"
 		beq $t1, $zero, end_getting	# Se for o caractere nulo, encerra o loop
 		beq $t1, 0x20, end_getting    	# Se for um espaco, encerra o loop
-		beq $t1, 0x2d, errorOptions	# Se encontrar um '-' retorna um erro de opções inválidas
 		beq $t2, 24, end_getting	# Se a quantidade de caracteres for 24, encerra o loop
 
 		sb   $t1, 0($s0)	# Armazena o caractere em $s0
@@ -255,7 +254,7 @@ getOptions:
 
 	# Finaliza o processo de obtencao de options
 	end_getting:
-		addi $s7, $s7, 25	# Incrementa o index de options em 25 para obtenção da próxima option
+		addi $s7, $s7, 25	# Incrementa o index de options em 25 para obtencao da proxima option
 		b    takeOption		# Recomeca o processo de encontrar options
 
 	# Encerra e retorna ao programa
@@ -266,16 +265,11 @@ getOptions:
 
 		la   $v0, options	# Retorna o endereco de options 
 		jr   $ra		# Retorna a funcao que o chamou
-		
-	errorOptions:
-		la  $a0, invalidOptions	# Recebe o endereço de invalidOptions para impressão
-		jal mmio_printString	# Imprime a string de erro
-		jr  $ra			# Retorna ao programa
-		
+			
 		
 # Secao de memoria para armazenar a string de erro de opcoes
 .data
-	invalidOptions:	.asciiz "Erro: opções inválidas."
+	invalidOptions:	.asciiz "Erro: opcoes invalidas.\n"
 		
 		
 # Secao de memoria estatica para uso em getOptions		
@@ -296,3 +290,26 @@ getOptions:
 	receiver_data:	     .word 0xffff0004	# Endereco dos dados de Receptor
 	
 	
+# Subprograma:		countOptions
+# Proposito:		Contar a quantidade de options passadas no comando
+# Input:		$a0 - Endereco das options
+# Retorno:		$v0 - Quantidade de options inseridas
+# Side effects:		Nao se aplica
+.text
+countOptions:
+	move $t0, $a0	# Copia o endereco de options em $t0
+	li   $t1, 0	# Inicializa o contador de options
+	
+	loopCount:
+		lb   $t3, 0($t0)	# Obtem o caractere da option
+		beqz $t3, endCount	# Se o caractere da option for '\0' encerra o loop
+		
+		addi $t0, $t0, 25	# Incrementa o index do array de options
+		addi $t1, $t1, 1	# Incrementa o contador de options
+		b loopCount		# Reinicia o loop
+		
+	endCount:
+		move $v0, $t1	# Retorna o valor de contagem
+		
+	jr $ra	# Retorna a funcao que o chamou
+
