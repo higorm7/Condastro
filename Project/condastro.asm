@@ -205,28 +205,30 @@ main:
 			
 		# Bloco de infoGeral
 		infoGeral:
-			la   $t1, moradores	# Carrega o endereco de moradores em $t1
-			li   $t7, 0		# Inicializa o contador de APs
+			la   $s0, moradores	# Carrega o endereco de moradores em $t1
+			li   $s1, 0		# Inicializa o contador de APs
+			li   $s2, 0		# Inicializa acumulador de nao vazios
 			
 			loopAp:
-				beq  $t7, 24, endLoopAp		# Se o contador for igual a 24 (Numero de apartamentos) encerra
-				lw   $t0, 0($t1)		# Carrega a quantidade de moradores 
+				beq  $s1, 24, endLoopAp		# Se o contador for igual a 24 (Numero de apartamentos) encerra
+				lw   $t0, 0($s0)		# Carrega a quantidade de moradores
+
+				# Verifica se o ap esta vazio				
 				bgt  $t0, $zero, addNaoVazio	# Se a quantidade de moradores for maior que zero, adiciona apartamento nao vazio
-				ble  $t0, $zero, increment
+				ble  $t0, $zero, increment	# Se for vazio, passa para o proximo apartamento
 				
 				addNaoVazio:
-					addi $t0, $t0, 1
+					addi $s2, $s2, 1	# Incrementa o numero de aps nao vazios
 				
 				increment:
-					addi $t7, $t7, 1		# incrementa o contador
-					addi $t1, $t1, 4		# Incrementa o endereco de moradores
-				
-			endLoopAp:
-				
-			la $a0, str_naoVazios
-			li $v0, 4
-			syscall
-			
+					addi $s1, $s1, 1		# incrementa o contador
+					addi $s0, $s0, 4		# Incrementa o endereco de moradores
+					b    loopAp			# Recomeca o loop
+								
+			# Finaliza a leitura dos aps
+			endLoopAp:				
+				la $a0, str_naoVazios	# Utiliza str_naoVazios como parametro de mmio_printString
+				jal mmio_printString	# Imprime str_naoVazios
 			
 			b restart
 			
@@ -293,7 +295,7 @@ main:
 # Armazena os dados dos apartamentos
 .data
 	moradores:	 .space 96		# Array para armazenar a quantidade de moradores (24 apartamentos, armazenando um inteiro (4 bytes))
-	nomes_moradores: .space 3600		# Array que contém os nomes dos moradores de um apartamento (24 * 6 * 25)
+	nomes_moradores: .space 3600		# Array que contÃ©m os nomes dos moradores de um apartamento (24 * 6 * 25)
 
 
 .include "mmio_utils.asm"
