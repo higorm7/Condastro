@@ -205,9 +205,28 @@ main:
 			
 		# Bloco de infoGeral
 		infoGeral:
+			la   $t1, moradores	# Carrega o endereco de moradores em $t1
+			li   $t7, 0		# Inicializa o contador de APs
+			
+			loopAp:
+				beq  $t7, 24, endLoopAp		# Se o contador for igual a 24 (Numero de apartamentos) encerra
+				lw   $t0, 0($t1)		# Carrega a quantidade de moradores 
+				bgt  $t0, $zero, addNaoVazio	# Se a quantidade de moradores for maior que zero, adiciona apartamento nao vazio
+				ble  $t0, $zero, increment
+				
+				addNaoVazio:
+					addi $t0, $t0, 1
+				
+				increment:
+					addi $t7, $t7, 1		# incrementa o contador
+					addi $t1, $t1, 4		# Incrementa o endereco de moradores
+				
+			endLoopAp:
+				
+			la $a0, str_naoVazios
 			li $v0, 4
-			la $a0, cmd_7
 			syscall
+			
 			
 			b restart
 			
