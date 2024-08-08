@@ -98,30 +98,43 @@ main:
 		
 		# Bloco de addMorador
 		addMorador:
+			# Obtem as options
 			move $a0, $s1		# Utiliza a string de comando como parametro para getOptions
 			jal  getOptions		# Obtem as options
 			move $s2, $v0		# Armazena o endereco das options em $s2
 			
-			move $a0, $s2						# Utiliza o endereco das options como parametro para countOptions
-			jal  countOptions					# Conta a quantidade de options
-			move $t0, $v0						# Armazena em $t0 a quantidade de options
+			# Erro de opcoes invalidas
+			move $a0, $s2				# Utiliza o endereco das options como parametro para countOptions
+			jal  countOptions			# Conta a quantidade de options
+			move $t0, $v0				# Armazena em $t0 a quantidade de options
 			bne  $t0, 2, errorInvalidOptions	# Se houver mais que duas options, imprime erro de Options
 			
-			move $a0, $s2						# Passa $s2 como parametro para optionToInt
-			jal  optionToInt					# Transforma o valor contido na primeira option em inteiro
-			move $s3, $v0						# Armazena o retorno em $s3
+			# Converte strings numericas para inteiros
+			move $a0, $s2				# Passa $s2 como parametro para optionToInt
+			jal  optionToInt			# Transforma o valor contido na primeira option em inteiro
+			move $s3, $v0				# Armazena o retorno em $s3
 			beqz $s3, errorInvalidOptions		# Se o retorno for igual a 0, houve erro de caracteres
 			
-			move $a0, $s3
-			jal checkValidApartment
-			move $t1, $v0
-			beqz $t1, errorInvalidApartment
+			# Erro de apartamento invalido
+			move $a0, $s3				# Move o inteiro para o parametro de checkValidApartment
+			jal  checkValidApartment		# Checa se o apartamento e valido
+			move $t1, $v0				# Armazena o valor retornado em $t1
+			beqz $t1, errorInvalidApartment		# Se o valor retornado for 0, indica erro de apartamento invalido
 			
-			move $a0, $s3
-			jal calculateApartAddress
-			move $a0, $v0
-			li $v0, 1
-			syscall
+			# Calcula o offset do endereco do apartamento
+			move $a0, $s3			# Usa o numero do apartamento como parametro pra calcular o endereco do apartamento
+			jal  calculateApartAddress	# Calcula o endereco
+			move $t1, $v0			# Armazena o offset em $t1
+			
+			#  Obtem a quantidade de moradores no apartamento especificado
+			la   $t2, moradores	# Armazena o endereco da quantidade de moradores em $t2
+			add  $t2, $t2, $t1	# Incrementa o endereco a quantidade de bytes que o offset indica
+			lw   $t3, 0($t2)	# Recupera a quantidade de moradores do local
+			
+			# Erro de apartamento cheio 
+			bge  $t3, 6, errorMoradores	# Se o apartamento contiver mais que 6 pessoas, erro de apartamento cheio
+			addi $t3, $t3, 1		# Se nao tiver acontecido erro, adiciona mais um morador no apartamento
+			sw   $t3, 0($t2)		# Armazena a quantidade de moradores 
 			
 			b restart
 			
@@ -237,6 +250,12 @@ main:
 			la  $a0, invalid_apart
 			jal mmio_printString
 			b   restart
+			
+		# Erro de apartamento cheio
+		errorMoradores:
+			la $a0, full_apart
+			jal mmio_printString
+			b restart
 		
 		# Erro de opcoes invalidas
 		errorInvalidOptions:
@@ -254,7 +273,8 @@ main:
 
 # Armazena os dados dos apartamentos
 .data
-	moradores:	.space 96		# Array para armazenar a quantidade de moradores (24 apartamentos, armazenando um inteiro (4 bytes))
+	moradores:	 .space 96		# Array para armazenar a quantidade de moradores (24 apartamentos, armazenando um inteiro (4 bytes))
+	nomes_moradores: .space 3600		# Array que contém os nomes dos moradores de um apartamento (24 * 6 * 25)
 
 
 .include "mmio_utils.asm"
