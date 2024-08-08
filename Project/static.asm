@@ -18,5 +18,6 @@
 	cmd_9: 			.asciiz "recarregar"
 	cmd_10: 		.asciiz "formatar"
 	cmd_11:			.asciiz "finalizar"
-	invalid_cmd: 	.asciiz "Comando invalido\n"
-	invalid_apart:	.asciiz "Apartamento invalido\n"
+	invalid_cmd: 		.asciiz "Comando invalido\n"
+	invalid_apart:		.asciiz "Apartamento invalido\n"
+	full_apart:		.asciiz "Apartamento cheio\n"
