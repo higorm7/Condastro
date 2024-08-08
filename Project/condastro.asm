@@ -126,6 +126,10 @@ main:
 			jal  calculateApartAddress	# Calcula o endereco
 			move $t1, $v0			# Armazena o offset em $t1
 			
+			move $a0, $t1
+			li $v0, 1
+			syscall
+			
 			#  Obtem a quantidade de moradores no apartamento especificado
 			la   $t2, moradores	# Armazena o endereco da quantidade de moradores em $t2
 			add  $t2, $t2, $t1	# Incrementa o endereco a quantidade de bytes que o offset indica
@@ -212,8 +216,11 @@ main:
 			loopAp:
 				beq  $s1, 24, endLoopAp		# Se o contador for igual a 24 (Numero de apartamentos) encerra
 				lw   $t0, 0($s0)		# Carrega a quantidade de moradores
-
-				# Verifica se o ap esta vazio				
+				
+				move $a0, $t0
+				li $v0, 1
+				syscall
+				
 				bgt  $t0, $zero, addNaoVazio	# Se a quantidade de moradores for maior que zero, adiciona apartamento nao vazio
 				ble  $t0, $zero, increment	# Se for vazio, passa para o proximo apartamento
 				
@@ -223,17 +230,16 @@ main:
 				increment:
 					addi $s1, $s1, 1		# incrementa o contador
 					addi $s0, $s0, 4		# Incrementa o endereco de moradores
-					b    loopAp			# Recomeca o loop
+					b loopAp
 								
-			# Finaliza a leitura dos aps
-			endLoopAp:
-				# Imprime a quantidade de apartamentos nao vazios				
-				la  $a0, str_naoVazios	# Utiliza str_naoVazios como parametro de mmio_printString
-				jal mmio_printString	# Imprime str_naoVazios
+			endLoopAp:				
+				la $a0, str_naoVazios
+				li $v0, 4
+				syscall
 				
-				# Imprime a quantidade de apartamentos vazios
-				la  $a0, str_vazios		# Utiliza str_vazios como parametro do mmio_printString
-				jal mmio_printString	# Imprime str_vazios
+				move $a0, $s6
+				li $v0, 1
+				syscall
 			
 			b restart
 			
