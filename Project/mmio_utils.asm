@@ -24,7 +24,7 @@ clearOptions:
     ori $t2, $zero, 150		# Carrega o tamanho do buffer em $t2
     ori $t1, $zero, 0		# Inicializa o contador em 0
     
-    # LaÃƒÂ§o de limpeza do buffer
+    # LaÃƒÆ’Ã‚Â§o de limpeza do buffer
 	clear:
     	beq  $t1, $t2, end_clear 	# Se o contador atingir 150, encerrar
     	sb   $zero, 0($t0)        	# Armazena zero no index do buffer
@@ -107,7 +107,7 @@ getInput:
 	lw   $t2, transmitter_control	# Armazena o endereco do registrador de controle do display em $t2
 	lw   $t3, transmitter_data	# Armazena o endereco do registrador de dados do display em $t3
 	
-	# AlocaÃ§Ã£o de memÃ³ria para o comando
+	# AlocaÃƒÂ§ÃƒÂ£o de memÃƒÂ³ria para o comando
 	li   $a0, 100		# Aloca 100 bytes para o comando
 	ori  $v0, $zero, 9	# Servico 9 indica alocacao de memoria
 	syscall			# Realiza a alocacao
@@ -150,7 +150,7 @@ getInput:
 # Subprograma:	getCommand
 # Proposito:	Extrair o comando da string de input
 # Input:	$a0 - Endereco da string a ser obtido o comando
-# Output:	$v0 - EndereÃ§o da string apos a extracao do comando
+# Output:	$v0 - EndereÃƒÂ§o da string apos a extracao do comando
 # Side effects:	Nao se aplica
 getCommand:
 	addi $sp, $sp, -8	# Aloca 8 bytes na pilha para armazenamento de valores de registradores usados
@@ -158,7 +158,7 @@ getCommand:
 	sw   $s1, 4($sp)	# Armazena o valor de $s1
 	
 	move $s0, $a0		# Salva $a0 em $s0 para manter o valor
-	li   $a0, 15		# Indica 15 bytes para alocaÃ§Ã£o de memÃ³ria
+	li   $a0, 15		# Indica 15 bytes para alocaÃƒÂ§ÃƒÂ£o de memÃƒÂ³ria
 	ori  $v0, $zero, 9	# Servico 9 indica alocacao de memoria
 	syscall			# Aloca a memoria
 	move $t0, $v0		# Armazena o endereco alocado em $t0 para manipulacao
@@ -216,16 +216,16 @@ getOptions:
 		seq  $t1, $t1, 0x20		# Se o caractere for igual a espaco, retorna 1
 		beqz $t1, restart_take		# Se nao for, recomeca o loop
 
-		lb   $t2, 1($t0)		# Carrega o prÃ³ximo caractere
+		lb   $t2, 1($t0)		# Carrega o prÃƒÂ³ximo caractere
 		seq  $t2, $t2, 0x2d		# Se o caractere for igual a '-', retorna 1
 
 		and  $t1, $t1, $t2		# Se os dois forem os caracteres desejados, retorna 1
 		beqz $t1, restart_take		# Se nao forem, recomeca o loop
 
-		lb   $t2, 2($t0)		# Carrega o prÃ³ximo caractere
+		lb   $t2, 2($t0)		# Carrega o prÃƒÂ³ximo caractere
 		seq  $t2, $t2, 0x2d		# Se o caractere for igual a '-', retorna 1
 
-		and  $t1, $t1, $t2		# Se os trÃªs forem os caracteres desejados, retorna 1
+		and  $t1, $t1, $t2		# Se os trÃƒÂªs forem os caracteres desejados, retorna 1
 		bnez $t1, equal			# Se forem os caracteres desejados, finaliza o loop
 
 	# Reinicio do loop
@@ -321,14 +321,15 @@ countOptions:
 # Side effects:		Nao se aplica
 .text
 optionToInt:
-	li $t1, 0	# Inicializa o acumulador de valor
-	li $t2, 0	# Inicializa o contador de caracteres
+	li   $t1, 0	# Inicializa o acumulador de valor
+	li   $t2, 0	# Inicializa o contador de caracteres
+	move $t3, $a0	# Copia o endereco do parametro para manipulacao
 	
 	# Loop de conversao de caracteres em inteiros
 	convertLoop:
-		lb   $t0, 0($a0)		# Obtem o caractere de option
+		lb   $t0, 0($t3)		# Obtem o caractere de option
 		
-		beqz $t0, endConvert	# Se for o caractere nulo, finaliza o loop
+		beqz $t0, endConvert		# Se for o caractere nulo, finaliza o loop
 		beq  $t0, 0x20, endConvert	# Se o caractere for um espaco, finaliza o loop
 		
 		subi $t0, $t0, 48			# 48 = '0' em ASCII, remove o valor de $t0
@@ -338,7 +339,7 @@ optionToInt:
 		mul  $t1, $t1, 10		# Multiplica o acumulador por 10 a cada entrada de numero
 		add  $t1, $t1, $t0		# Adiciona o numero que acabou de ser lido
 		
-		addi $a0, $a0, 1	# Incrementa o contador da option
+		addi $t3, $t3, 1	# Incrementa o contador da option
 		addi $t2, $t2, 1	# Incrementa o contador de caracteres
 		
 		bne  $t2, 4, convertLoop		# Se houver menos que 4 caracteres lidos, reinicia o loop
@@ -396,6 +397,7 @@ calculateApartAddress:
 	mflo $t1			# Move o andar para t1
 	mfhi $t2			# Move o numero de apartamento para t2
 	
+	addi $t1, $t1, -1	# Decrementa o numero de andares
 	mul  $t1, $t1, 4	# Multiplica pelo tamanho do inteiro (4 bytes)
 	addi $t2, $t2, -1	# Decrementa o numero de apartamento
 	mul  $t2, $t2, 4	# Multiplica pelo tamanho do inteiro (4 bytes)
@@ -405,5 +407,3 @@ calculateApartAddress:
 	jr   $ra			# Retorna para a funcao que o chamou
 	
 	
-
-
