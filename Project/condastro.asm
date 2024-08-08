@@ -226,9 +226,14 @@ main:
 					b    loopAp			# Recomeca o loop
 								
 			# Finaliza a leitura dos aps
-			endLoopAp:				
-				la $a0, str_naoVazios	# Utiliza str_naoVazios como parametro de mmio_printString
+			endLoopAp:
+				# Imprime a quantidade de apartamentos nao vazios				
+				la  $a0, str_naoVazios	# Utiliza str_naoVazios como parametro de mmio_printString
 				jal mmio_printString	# Imprime str_naoVazios
+				
+				# Imprime a quantidade de apartamentos vazios
+				la  $a0, str_vazios		# Utiliza str_vazios como parametro do mmio_printString
+				jal mmio_printString	# Imprime str_vazios
 			
 			b restart
 			

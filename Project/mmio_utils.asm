@@ -409,3 +409,104 @@ calculateApartAddress:
 		jr   $ra			# Retorna para a funcao que o chamou
 	
 	
+# Subprograma:		intToStr
+# Proposito:		Converte um inteiro em string
+# Input:			$a0 - inteiro a ser convertido
+# Retorno:			$v0 - endereco da string 
+# Side effects:		Nao se aplica	
+intToStr:
+	addi $sp, $sp, -12	# Aloca 8 bytes na pilha
+	sw   $ra, 0($sp)	# Armazena o valor do endereco de retorno na pilha
+	sw   $s0, 4($sp)	# Armazena $s0 na pilha
+	sw   $s1, 8($sp)	# Armazena #s1 na pilha
+
+	move $s0, $a0		# Copia o valor de $a0 em $s0
+	
+	# Aloca os bytes para o armazenamento da string
+	ori  $v0, $zero, 9	# Servico de alocacao de memoria para a string
+	li   $a0, 5			# Aloca memoria para ate 4 digitos
+	syscall				# Aloca os 5 bytes solicitados
+	move $s1, $v0		# Armazena o endereco alocado
+	move $t3, $s1		# s1 mantera o endereco base da string
+	
+	li   $t2, 0			# Inicializa um contador de caracteres
+	 
+	# Loop de conversao de digitos
+	convertInt:
+		bge  $t2, 4, endConvertInt	# Se houver mais que 4 caracteres, encerra a conversao
+    	div  $s0, $s0, 10		# Inicializa $s0 com 10 (divisor)
+    	mfhi $t0                # $t0: resto da divisao (digito a ser convertido)
+    	mflo $t1                # $a0: quociente da divisao
+
+	    addi $t0, $t0, 48		# Converte o digito para ascii
+    	sb   $t0, 0($t3)		# Armazena o digito no espaco alocado
+    	addi $t3, $t3, 1		# Incrementa o index do espaco alocado
+		addi $t2, $t2, 1		# Incrementa o contador de caracterez
+
+	    bnez $t1, convertInt	# Se o quociente nao for zero, reinicia o loop
+    	
+	endConvertInt:
+    	sb   $zero, 0($t3)		# Adiciona '\0' no final da string
+    	move $a0, $s1			# Utiliza a string obtida como parametro de reverseStr
+    	jal  reverseStr			# inverte a string para adequar os numeros
+    	move $s1, $v0			# Armazena o retorno em $s1
+    	move $v0, $s1			# Armazena o endereco da string em $v0
+    	
+    	lw   $ra, 0($sp)		# Recupera o endereco de retorno
+    	lw   $s0, 4($sp)		# Recupera o valor de $s0
+    	lw   $s1, 0($sp)		# Recupera o valor de $s1
+    	addi $sp, $sp, 12		# Devolve a memoria a pilha
+
+    	jr $ra		# Retorna ao programa que o chamou
+
+
+# Subprograma:		reverseStr
+# Proposito:		Inverte a ordem de uma string
+# Input:			$a0 - endereco da string a ser invertida
+# Retorno:			$v0 - endereco da string invertida
+# Side effects:		Nao se aplica	
+reverseStr:
+	addi $sp, $sp, -16		# Aloca 16 bytes na pilha
+	sw   $ra, 0($sp)		# Armazena o endereco de retorno
+	sw   $s0, 4($sp)		# Armazena o valor de s0
+	sw   $s1, 8($sp)		# Armazena o valor de s1
+	sw   $s2, 12($sp)
+
+	move $s0, $a0		# Copia o endereco da string em s0
+	move $s2, $s0		# Mantem a referencia base da string em s2
+
+	# Loop para encontrar o fim da string
+	findEnd:
+		lb   $t0, 0($s0)		# Carrega o caractere
+		beqz $t0, foundEnd		# Se for o terminador de string, jump para foundEnd
+		addi $s0, $s0, 1		# Incrementa o index da string
+		b    findEnd			# Recomeca o loop
+	
+	foundEnd:
+		addi $s0, $s0, -1		# Encontra o ultimo caractere da string
+		move $t1, $a0			# t1 armazena o caractere de inicio da string
+		move $t2, $s0       	# t2 armazena o ultimo caractere da string
+
+	reverseLoop:
+		bge $t1, $t2, endReverse		# Se o inicio for maior ou igual ao fim, encerra
+
+		# Inverte os caracteres
+		lb $t3, 0($t1)		# Carrega o caractere do inicio
+		lb $t4, 0($t2)		# Carrega o caractere do fim
+		sb $t3, 0($t2)		# Armazena o caractere do início no fim
+		sb $t4, 0($t1)		# Armazena o caractere do fim no início
+
+		addi $t1, $t1, 1	# Incrementa o index do inicio
+		addi $t2, $t2, -1	# Decrementa o caractere do fim
+		b    reverseLoop	# Reinicia o loop
+
+	endReverse:
+		move $v0, $s2			# Retorna o endereco base da string
+		lw   $ra, 0($sp)		# Recupera o endereco de retorno da pilha
+		lw   $s0, 4($sp)		# Recupera o valor de $s0
+		lw   $s1, 8($sp)		# Recupera o valor de s1
+		lw   $s2, 12($sp)		# Recupera o valor de $s2
+		addi $sp, $sp, 16		# Devolve a memoria alocada a pilha
+
+	jr $ra		# Retorna a funcao que o chamou
+
