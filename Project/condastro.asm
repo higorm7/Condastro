@@ -126,10 +126,6 @@ main:
 			jal  calculateApartAddress	# Calcula o endereco
 			move $t1, $v0			# Armazena o offset em $t1
 			
-			move $a0, $t1
-			li $v0, 1
-			syscall
-			
 			#  Obtem a quantidade de moradores no apartamento especificado
 			la   $t2, moradores	# Armazena o endereco da quantidade de moradores em $t2
 			add  $t2, $t2, $t1	# Incrementa o endereco a quantidade de bytes que o offset indica
@@ -139,6 +135,8 @@ main:
 			bge  $t3, 6, errorMoradores	# Se o apartamento contiver mais que 6 pessoas, erro de apartamento cheio
 			addi $t3, $t3, 1		# Se nao tiver acontecido erro, adiciona mais um morador no apartamento
 			sw   $t3, 0($t2)		# Armazena a quantidade de moradores 
+			
+			# Adicao do nome do morador no endereco correto
 			
 			b restart
 			
@@ -217,10 +215,6 @@ main:
 				beq  $s1, 24, endLoopAp		# Se o contador for igual a 24 (Numero de apartamentos) encerra
 				lw   $t0, 0($s0)		# Carrega a quantidade de moradores
 				
-				move $a0, $t0
-				li $v0, 1
-				syscall
-				
 				bgt  $t0, $zero, addNaoVazio	# Se a quantidade de moradores for maior que zero, adiciona apartamento nao vazio
 				ble  $t0, $zero, increment	# Se for vazio, passa para o proximo apartamento
 				
@@ -230,16 +224,18 @@ main:
 				increment:
 					addi $s1, $s1, 1		# incrementa o contador
 					addi $s0, $s0, 4		# Incrementa o endereco de moradores
-					b loopAp
+					b    loopAp			# Recomeca o loop
 								
 			endLoopAp:				
-				la $a0, str_naoVazios
-				li $v0, 4
-				syscall
+				la  $a0, str_naoVazios	# Recebe o endereco de str_naoVazios
+				jal mmio_printString	# Imprime no mmio
 				
-				move $a0, $s6
-				li $v0, 1
-				syscall
+				move $a0, $s2		# Usa a quantidade de nao vazios para impressao
+				jal  intToStr		# Converte o inteiro para string
+				move $a0, $v0		# Usa a string obtida para impressao
+				jal  mmio_printString	# Imprime a string
+				la   $a0, newLine	# Usa newLine como parametro de printString
+				jal  mmio_printString	# Imprime newLine
 			
 			b restart
 			
@@ -306,7 +302,7 @@ main:
 # Armazena os dados dos apartamentos
 .data
 	moradores:	 .space 96		# Array para armazenar a quantidade de moradores (24 apartamentos, armazenando um inteiro (4 bytes))
-	nomes_moradores: .space 3600		# Array que contÃ©m os nomes dos moradores de um apartamento (24 * 6 * 25)
+	nomes_moradores: .space 3600		# Array que contÃƒÂ©m os nomes dos moradores de um apartamento (24 * 6 * 25)
 
 
 .include "mmio_utils.asm"
