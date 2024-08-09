@@ -27,3 +27,8 @@
 	apartment:		.asciiz "Apartamento: "
 	apVazio:		.asciiz "Apartamento vazio.\n"
 	str_moradores:	.asciiz "Moradores:\n"
+	tipoInvalido:	.asciiz "Tipo de automovel invalido\n"
+	str_carro:		.asciiz "Carro:\n"
+	str_moto:		.asciiz "Moto:\n"
+	slash:			.asciiz " / "
+	

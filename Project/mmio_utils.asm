@@ -512,8 +512,8 @@ reverseStr:
 
 # Subprograma:		calculateNomeAddress
 # Proposito:		Calcula o endereco de nomes de um apartamento
-# Input:		$a0 - numero do apartamento
-# Retorno:		$v0 - offset
+# Input:			$a0 - numero do apartamento
+# Retorno:			$v0 - offset
 # Side effects:		Nao se aplica
 .text
 calculateNomeAddress:
@@ -535,14 +535,15 @@ calculateNomeAddress:
 	
 # Subprograma:		strcpy
 # Propósito:		Copiar a string contida na origem para o endereço destino
-# Input:		$a0 - endereço de memória destino
-#			$a1 - endereço de memória origem
-# Retorno:		$v0 - endereço de memória destino
+# Input:			$a0 - endereço de memória destino
+#					$a1 - endereço de memória origem
+# Retorno:			$v0 - endereço de memória destino
 .text
 strcpy:
-	addi $sp, $sp, -8	# Alocando 8 bytes na pilha para armazenar endereço de retorno e $s0
+	addi $sp, $sp, -12	# Alocando 8 bytes na pilha para armazenar endereço de retorno e $s0
 	sw   $ra, 0($sp)	# Armazenando o valor de retorno na pilha
-	sw   $s0, 4($sp)	# Armazenando $s0 para disponibilizá-lo no subprograma
+	sw   $s0, 4($sp)	# Armazenando $s0 para disponibiliza-lo no subprograma
+	sw   $s1, 8($sp)	# Armazena $s1 para disponibiliza-lo no subprograma
 	
 	move $s0, $a0	# Copiando o endereço de destino no registrador temporário $t1
 	move $t1, $a1	# Copiando o endereço de origem no registrador $t1
@@ -565,6 +566,55 @@ strcpy:
 		move $v0, $s1		# Copia o endereço base de destino no endereço de retorno da função
 		lw   $ra, 0($sp)	# Recupera o valor de retorno da função
 		lw   $s0, 4($sp)	# Recupera o valor de $s0
-		addi $sp, $sp, 8	# Devolve a memória à pilha
+		lw   $s1, 8($sp)	# Recupera o valor de $s1
+		addi $sp, $sp, 12	# Devolve a memória à pilha
 		
 		jr $ra			# Retorna à função de origem
+		
+
+# Subprograma:		calculateCarroAddress
+# Proposito:		Calcula o endereco de carros de um apartamento
+# Input:			$a0 - numero do apartamento
+# Retorno:			$v0 - offset
+# Side effects:		Nao se aplica
+.text
+calculateCarroAddress:
+	move $t0, $a0		# Armazena o valor de $a0 em $t0
+	
+	div  $t0, $t0, 100	# Obtem o andar do apartamento
+	mflo $t1		# Move o andar para t1
+	mfhi $t2		# Move o numero de apartamento para t2
+	
+	addi $t1, $t1, -1	# Decrementa 1 do andar
+	mul  $t1, $t1, 16	# Multiplica por 16
+	addi $t2, $t2, -1	# Decrementa o numero do apartamento
+	mul  $t2, $t2, 8	# Multiplica pelo tamanho do inteiro (4 bytes)
+	add  $t3, $t1, $t2	# Acumula os dois valores em $t1	
+
+	move $v0, $t3	# Retorna $t3 (offset)
+	jr   $ra	# Retorna para a funcao que o chamou
+	
+
+# Subprograma:		calculateCarroAddress
+# Proposito:		Calcula o endereco de carros de um apartamento
+# Input:			$a0 - numero do apartamento
+# Retorno:			$v0 - offset
+# Side effects:		Nao se aplica
+.text
+calculateModeloAddress:
+	move $t0, $a0		# Armazena o valor de $a0 em $t0
+	
+	div  $t0, $t0, 100	# Obtem o andar do apartamento
+	mflo $t1		# Move o andar para t1
+	mfhi $t2		# Move o numero de apartamento para t2
+	
+	addi $t1, $t1, -1	# Decrementa 1 do andar
+	mul  $t1, $t1, 20	# Multiplica por 16
+	addi $t2, $t2, -1	# Decrementa o numero do apartamento
+	mul  $t2, $t2, 10	# Multiplica pelo tamanho do inteiro (4 bytes)
+	add  $t3, $t1, $t2	# Acumula os dois valores em $t1	
+
+	move $v0, $t3	# Retorna $t3 (offset)
+	jr   $ra	# Retorna para a funcao que o chamou
+	
+	

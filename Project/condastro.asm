@@ -181,14 +181,67 @@ main:
 		addAuto:
 			move $a0, $s1		# Utiliza a string de comando como parametro para getOptions
 			jal  getOptions		# Obtem as options
-			move $s2, $v0		# Armazena o endereco das options em $s2
+			move $s0, $v0		# Armazena o endereco das options em $s2
 			
-			move $a0, $s2				# Utiliza o endereco das options como parametro para countOptions
+			move $a0, $s0				# Utiliza o endereco das options como parametro para countOptions
 			jal  countOptions			# Conta a quantidade de options
 			move $t0, $v0				# Armazena em $t0 a quantidade de options
 			bne  $t0, 4, errorInvalidOptions	# Se houver mais que quatro options, imprime erro de Options
 			
-			b restart
+			# Converte strings numericas para inteiros
+			move $a0, $s0					# Passa $s2 como parametro para optionToInt
+			jal  optionToInt				# Transforma o valor contido na primeira option em inteiro
+			move $s1, $v0					# Armazena o retorno em $s3
+			beqz $s1, errorInvalidOptions	# Se o retorno for igual a 0, houve erro de caracteres
+			
+			# Erro de apartamento invalido
+			move $a0, $s1						# Move o inteiro para o parametro de checkValidApartment
+			jal  checkValidApartment			# Checa se o apartamento e valido
+			move $t1, $v0						# Armazena o valor retornado em $t1
+			beqz $t1, errorInvalidApartment		# Se o valor retornado for 0, indica erro de apartamento invalido
+			
+			addi $s0, $s0, 25				# Incrementa o endereco de option para encontrar option 2
+			lb   $t1, 0($s0)				# carrega o caractere contido em option 2
+			seq  $t2, $t1, 0x63				# Verifica se o caractere e igual a 'c'
+			seq  $t3, $t1, 0x6d				# Verifica se o caractere e igual a 'm'
+			or   $t4, $t2, $t3				# Verifica se um dos dois e igual
+			beqz $t4, errorTipoAutomovel	# se nao for igual a m ou c, jump para errorTipoAutomovel
+			lb   $t1, 1($s0)				# Le o proximo caractere
+			bnez $t1, errorTipoAutomovel	# Se houver caracteres alem de m ou c, ocasiona em erro
+			bnez $t2, carro					# Se $t2 nao for 0, jump para carro
+			bnez $t3, moto					# Se $t3 nao for 0, jump para moto
+			
+			moto:
+				li $v0, 4
+				la $a0, str_moto
+				syscall
+				b endAddAuto
+				
+			carro:
+				# Armazena o modelo do carro
+				move $a0, $s1				# Usa o numero do apartamento como parametro
+				jal  calculateModeloAddress	# Calcula o endereco de carros
+				move $t0, $v0				# Armazena o retorno em $t0
+				la   $t1, carros_modelos	# Armazena o endereco de carros_modelos em $t1
+				add  $t1, $t1, $t0			# Incrementa para o index informado pelo offset
+				addi $s0, $s0, 25			# Incrementa as options para o index da option 3
+				move $a0, $t1				# Passa o endereco de carros com o offset para copia em strcpy
+				move $a1, $s0				# passa o endereco da option 4 para copia em strcpy
+				jal strcpy					# Copia a placa em carros
+				
+				# Armazena a placa do carro
+				move $a0, $s1				# Usa o numero do apartamento como parametro
+				jal  calculateCarroAddress	# Calcula o endereco de carros
+				move $t0, $v0				# Armazena o retorno em $t0
+				la   $t1, carros			# Armazena o endereco de carros em $t1
+				add  $t1, $t1, $t0			# Incrementa para o index informado pelo offset
+				addi $s0, $s0, 25			# Incrementa as options para o index da option 4
+				move $a0, $t1				# Passa o endereco de carros com o offset para copia em strcpy
+				move $a1, $s0				# passa o endereco da option 4 para copia em strcpy
+				jal strcpy					# Copia a placa em carros
+			
+			endAddAuto:
+				b restart
 			
 		# Bloco de rmvAuto
 		rmvAuto:
@@ -275,7 +328,7 @@ main:
 				
 				# Loop para imprimir todos os moradores do apartamento
 				loopPrintAp:
-					bge  $s1, 6, endPrintAp		# Se o contador for maior ou igual a 6, encerra
+					bge  $s1, 6, printCarros		# Se o contador for maior ou igual a 6, encerra
 					lb   $t2, 0($s0)			# Carrega o primeiro caractere do morador atual
 					beqz $t2, incrementPrintAp	# Se for '\0', incrementa para o proximo morador
 					
@@ -289,6 +342,48 @@ main:
 						addi $s1, $s1, 1		# Incrementa o contador de moradores
 						addi $s0, $s0, 25		# Incrementa o index do morador
 						b    loopPrintAp		# Recomeca o loop
+				
+				la   $a0, newLine			# carrega o caractere de newLine
+				jal  mmio_printString		# imprime o caractere de newLine
+				
+				printCarros:	
+					la $s0, carros_modelos		# Carrega o endereco de carros_modelos
+					la $s1, carros				# carrega o endereco de carros
+				
+					# calcula o offset de modelos
+					move $a0, $s3				# Usa o numero de ap como argumento
+					jal  calculateModeloAddress	# Obtem o offset de modelo
+					add  $s0, $s0, $v0			# Incrementa o index de carros_modelos
+					
+					# Se o endereco for vazio, ignora a impressao
+					lb   $t0, 0($s0)		# carrega o primeiro caractere de modelos_carros
+					beqz $t0, endPrintAp	# Se for nulo, finaliza a impressao
+				
+					# Calcula o offset de modelos
+					move $a0, $s3				# usa o numero de ap como argumento
+					jal  calculateCarroAddress	# calcula o offset de carros
+					add  $s1, $s1, $v0			# Incrementa o index de carros em offset
+				
+					# Imprime a string carros
+					la  $a0, str_carro
+					jal mmio_printString
+					
+					# imprime o modelo do carro
+					move $a0, $s0
+					jal  mmio_printString
+					
+					# Imprime / 
+					la  $a0, slash
+					jal mmio_printString
+					
+					# Imprime a placa do carro
+					move $a0, $s1
+					jal  mmio_printString
+				
+					# Imprime newLine
+					la $a0, newLine
+					jal mmio_printString
+					
 					
 			endPrintAp:
 				b restart	# Reinicia o programa
@@ -383,9 +478,15 @@ main:
 			
 		# Erro de apartamento cheio
 		errorMoradores:
-			la $a0, full_apart
+			la  $a0, full_apart
 			jal mmio_printString
-			b restart
+			b   restart
+			
+		# Erro de tipo de automovel invalido
+		errorTipoAutomovel:
+			la  $a0, tipoInvalido
+			jal mmio_printString
+			b   restart
 		
 		# Erro de opcoes invalidas
 		errorInvalidOptions:
@@ -395,7 +496,7 @@ main:
 		# Reinicia o programa
 		restart:
 			jal clearOptions
-			b exec
+			b   exec
 			
 	end_exec:
 		jal exit
@@ -403,9 +504,13 @@ main:
 
 # Armazena os dados dos apartamentos
 .data
-	moradores:	 .space 96		# Array para armazenar a quantidade de moradores (24 apartamentos, armazenando um inteiro (4 bytes))
-	nomes_moradores: .space 3600		# Array que contÃƒÂ©m os nomes dos moradores de um apartamento (24 * 6 * 25)
-
+	moradores:	 	 .space 96		# Array para armazenar a quantidade de moradores (24 apartamentos, armazenando um inteiro (4 bytes))
+	nomes_moradores: .space 3600	# Array que contem os nomes dos moradores de um apartamento (24 * 6 * 25)
+	carros_modelos:  .space 240		# Array que contem os nomes dos carros de um apartamento (24 aps * 10 caracteres)
+	carros:			 .space 192		# Array que contem os carros dos apartamentos (24 aps * 8 digitos da placa)
+	motos:			 .space 576		# Array que contem as motos dos apartamentos (24 aps * 3 motos * 8 digitos da placa)
+	motos_modelos:	 .space 720		# Array que contem os modelos das motos de um apartamento (24 aps * 3 motos * 10 caracteres)
+	
 
 .include "mmio_utils.asm"
 .include "static.asm"
