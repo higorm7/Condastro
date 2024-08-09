@@ -24,7 +24,7 @@ clearOptions:
     ori $t2, $zero, 150		# Carrega o tamanho do buffer em $t2
     ori $t1, $zero, 0		# Inicializa o contador em 0
     
-    # LaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o de limpeza do buffer
+    # LaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§o de limpeza do buffer
 	clear:
     	beq  $t1, $t2, end_clear 	# Se o contador atingir 150, encerrar
     	sb   $zero, 0($t0)        	# Armazena zero no index do buffer
@@ -107,7 +107,7 @@ getInput:
 	lw   $t2, transmitter_control	# Armazena o endereco do registrador de controle do display em $t2
 	lw   $t3, transmitter_data	# Armazena o endereco do registrador de dados do display em $t3
 	
-	# AlocaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de memÃƒÆ’Ã‚Â³ria para o comando
+	# AlocaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de memÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³ria para o comando
 	li   $a0, 100		# Aloca 100 bytes para o comando
 	ori  $v0, $zero, 9	# Servico 9 indica alocacao de memoria
 	syscall			# Realiza a alocacao
@@ -150,7 +150,7 @@ getInput:
 # Subprograma:	getCommand
 # Proposito:	Extrair o comando da string de input
 # Input:	$a0 - Endereco da string a ser obtido o comando
-# Output:	$v0 - EndereÃƒÆ’Ã‚Â§o da string apos a extracao do comando
+# Output:	$v0 - EndereÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o da string apos a extracao do comando
 # Side effects:	Nao se aplica
 getCommand:
 	addi $sp, $sp, -8	# Aloca 8 bytes na pilha para armazenamento de valores de registradores usados
@@ -158,7 +158,7 @@ getCommand:
 	sw   $s1, 4($sp)	# Armazena o valor de $s1
 	
 	move $s0, $a0		# Salva $a0 em $s0 para manter o valor
-	li   $a0, 15		# Indica 15 bytes para alocaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de memÃƒÆ’Ã‚Â³ria
+	li   $a0, 15		# Indica 15 bytes para alocaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de memÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³ria
 	ori  $v0, $zero, 9	# Servico 9 indica alocacao de memoria
 	syscall			# Aloca a memoria
 	move $t0, $v0		# Armazena o endereco alocado em $t0 para manipulacao
@@ -216,16 +216,16 @@ getOptions:
 		seq  $t1, $t1, 0x20		# Se o caractere for igual a espaco, retorna 1
 		beqz $t1, restart_take		# Se nao for, recomeca o loop
 
-		lb   $t2, 1($t0)		# Carrega o prÃƒÆ’Ã‚Â³ximo caractere
+		lb   $t2, 1($t0)		# Carrega o prÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³ximo caractere
 		seq  $t2, $t2, 0x2d		# Se o caractere for igual a '-', retorna 1
 
 		and  $t1, $t1, $t2		# Se os dois forem os caracteres desejados, retorna 1
 		beqz $t1, restart_take		# Se nao forem, recomeca o loop
 
-		lb   $t2, 2($t0)		# Carrega o prÃƒÆ’Ã‚Â³ximo caractere
+		lb   $t2, 2($t0)		# Carrega o prÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³ximo caractere
 		seq  $t2, $t2, 0x2d		# Se o caractere for igual a '-', retorna 1
 
-		and  $t1, $t1, $t2		# Se os trÃƒÆ’Ã‚Âªs forem os caracteres desejados, retorna 1
+		and  $t1, $t1, $t2		# Se os trÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âªs forem os caracteres desejados, retorna 1
 		bnez $t1, equal			# Se forem os caracteres desejados, finaliza o loop
 
 	# Reinicio do loop
@@ -391,28 +391,27 @@ checkValidApartment:
 # Side effects:		Nao se aplica
 .text
 calculateApartAddress:
-	move $t0, $a0	# Armazena o valor de $a0 em $t0
+	move $t0, $a0		# Armazena o valor de $a0 em $t0
 	
 	div  $t0, $t0, 100	# Obtem o andar do apartamento
-	mflo $t1			# Move o andar para t1
-	mfhi $t2			# Move o numero de apartamento para t2
+	mflo $t1		# Move o andar para t1
+	mfhi $t2		# Move o numero de apartamento para t2
 	
-	addi $t1, $t1, -1
-	mul  $t1, $t1, 8	# Multiplica pelo tamanho do inteiro (4 bytes)
+	addi $t1, $t1, -1	# Decrementa 1 do andar
+	mul  $t1, $t1, 8	# Multiplica por 8
 	addi $t2, $t2, -1	# Decrementa o numero do apartamento
 	mul  $t2, $t2, 4	# Multiplica pelo tamanho do inteiro (4 bytes)
-	add  $t3, $t1, $t2	# Acumula os dois valores em $t1
-	bne  $t1, 4, endCalculate
+	add  $t3, $t1, $t2	# Acumula os dois valores em $t1	
 
 	endCalculate:
-		move $v0, $t3		# Retorna $t1 (offset)
-		jr   $ra			# Retorna para a funcao que o chamou
+		move $v0, $t3	# Retorna $t3 (offset)
+		jr   $ra	# Retorna para a funcao que o chamou
 	
 	
 # Subprograma:		intToStr
 # Proposito:		Converte um inteiro em string
-# Input:			$a0 - inteiro a ser convertido
-# Retorno:			$v0 - endereco da string 
+# Input:		$a0 - inteiro a ser convertido
+# Retorno:		$v0 - endereco da string 
 # Side effects:		Nao se aplica	
 intToStr:
 	addi $sp, $sp, -12	# Aloca 8 bytes na pilha
@@ -434,28 +433,29 @@ intToStr:
 	# Loop de conversao de digitos
 	convertInt:
 		bge  $t2, 4, endConvertInt	# Se houver mais que 4 caracteres, encerra a conversao
-    	div  $s0, $s0, 10		# Inicializa $s0 com 10 (divisor)
-    	mfhi $t0                # $t0: resto da divisao (digito a ser convertido)
-    	mflo $t1                # $a0: quociente da divisao
-
-	    addi $t0, $t0, 48		# Converte o digito para ascii
-    	sb   $t0, 0($t3)		# Armazena o digito no espaco alocado
-    	addi $t3, $t3, 1		# Incrementa o index do espaco alocado
+    		div  $s0, $s0, 10		# Inicializa $s0 com 10 (divisor)
+    		mfhi $t0                	# $t0: resto da divisao (digito a ser convertido)
+    		mflo $t1                	# $t1: quociente da divisao
+    		
+    		addi $t0, $t0, 48		# Converte o digito para ascii
+    		sb   $t0, 0($t3)		# Armazena o digito no espaco alocado
+    		
+    		addi $t3, $t3, 1		# Incrementa o index do espaco alocado
 		addi $t2, $t2, 1		# Incrementa o contador de caracterez
 
-	    bnez $t1, convertInt	# Se o quociente nao for zero, reinicia o loop
+	    	bnez $t1, convertInt	# Se o quociente nao for zero, reinicia o loop
     	
 	endConvertInt:
-    	sb   $zero, 0($t3)		# Adiciona '\0' no final da string
-    	move $a0, $s1			# Utiliza a string obtida como parametro de reverseStr
-    	jal  reverseStr			# inverte a string para adequar os numeros
-    	move $s1, $v0			# Armazena o retorno em $s1
-    	move $v0, $s1			# Armazena o endereco da string em $v0
+    		sb   $zero, 0($t3)		# Adiciona '\0' no final da string
+    		move $a0, $s1			# Utiliza a string obtida como parametro de reverseStr
+    		jal  reverseStr			# inverte a string para adequar os numeros
+    		move $s1, $v0			# Armazena o retorno em $s1
+    		move $v0, $s1			# Armazena o endereco da string em $v0
     	
-    	lw   $ra, 0($sp)		# Recupera o endereco de retorno
-    	lw   $s0, 4($sp)		# Recupera o valor de $s0
-    	lw   $s1, 0($sp)		# Recupera o valor de $s1
-    	addi $sp, $sp, 12		# Devolve a memoria a pilha
+    		lw   $ra, 0($sp)		# Recupera o endereco de retorno
+    		lw   $s0, 4($sp)		# Recupera o valor de $s0
+    		lw   $s1, 0($sp)		# Recupera o valor de $s1
+    		addi $sp, $sp, 12		# Devolve a memoria a pilha
 
     	jr $ra		# Retorna ao programa que o chamou
 
@@ -493,8 +493,8 @@ reverseStr:
 		# Inverte os caracteres
 		lb $t3, 0($t1)		# Carrega o caractere do inicio
 		lb $t4, 0($t2)		# Carrega o caractere do fim
-		sb $t3, 0($t2)		# Armazena o caractere do início no fim
-		sb $t4, 0($t1)		# Armazena o caractere do fim no início
+		sb $t3, 0($t2)		# Armazena o caractere do inÃ­cio no fim
+		sb $t4, 0($t1)		# Armazena o caractere do fim no inÃ­cio
 
 		addi $t1, $t1, 1	# Incrementa o index do inicio
 		addi $t2, $t2, -1	# Decrementa o caractere do fim
