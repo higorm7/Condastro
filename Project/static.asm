@@ -24,3 +24,6 @@
 	str_naoVazios:	.asciiz "Nao vazios:\t"
 	str_vazios:		.asciiz "Vazios:\t\t"
 	newLine:		.asciiz "\n"
+	apartment:		.asciiz "Apartamento: "
+	apVazio:		.asciiz "Apartamento vazio.\n"
+	str_moradores:	.asciiz "Moradores:\n"

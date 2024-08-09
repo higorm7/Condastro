@@ -227,7 +227,71 @@ main:
 			move $t0, $v0				# Armazena em $t0 a quantidade de options
 			bne  $t0, 1, errorInvalidOptions	# Se houver mais que duas options, imprime erro de Options
 			
-			b restart
+			# Converte strings numericas para inteiros
+			move $a0, $s2					# Passa $s2 como parametro para optionToInt
+			jal  optionToInt				# Transforma o valor contido na primeira option em inteiro
+			move $s3, $v0					# Armazena o retorno em $s3
+			beqz $s3, errorInvalidOptions	# Se o retorno for igual a 0, houve erro de caracteres
+			
+			# Erro de apartamento invalido
+			move $a0, $s3						# Move o inteiro para o parametro de checkValidApartment
+			jal  checkValidApartment			# Checa se o apartamento e valido
+			move $t1, $v0						# Armazena o valor retornado em $t1
+			beqz $t1, errorInvalidApartment		# Se o valor retornado for 0, indica erro de apartamento invalido
+			
+			# Imprime a string apartamento e o numero do apartamento
+			la   $a0, apartment		# Carrega a string apartment como parametro
+			jal  mmio_printString	# Imprime a string
+			move $a0, $s2			# Carrega o numero do apartamento como parametro
+			jal  mmio_printString	# Imprime o numero do apartamento
+			la   $a0, newLine		# Carrega newLine como parametro
+			jal  mmio_printString	# Imprime newLine
+			
+			# Calcula o offset do endereco do apartamento
+			move $a0, $s3				# Usa o numero do apartamento como parametro pra calcular o endereco do apartamento
+			jal  calculateApartAddress	# Calcula o endereco
+			move $t1, $v0				# Armazena o offset em $t1
+			la   $t2, moradores			# Carrega o endereco de moradores
+			add  $t2, $t2, $t1			# Incrementa o endereco a quantidade contida no offset
+			lw   $t1, 0($t2)			# Le a quantidade de moradores no Ap
+			bnez $t1, naoVazio			# Se nao estiver vazio jump para naoVazio
+			
+			vazio:
+				la $a0, apVazio			# Carrega a string apVazio
+				jal mmio_printString	# Imprime a string
+				
+				b restart				# Reinicia o programa
+			
+			naoVazio:
+				# Adicao do nome do morador no endereco correto
+				move $a0, $s3				# Usa o numero do apartamento como parametro de calculateNomeAddress
+				jal  calculateNomeAddress	# Calcula o endereco do apartamento para armazenamento dos nomes
+				la   $s0, nomes_moradores	# Armazena o endereco de nomes_moradores em $t0
+				add  $s0, $s0, $v0			# Move ate o index retornado por calculateNomeAddress
+				li   $s1, 0					# Inicializa o contador de moradores com 0
+				
+				la   $a0, str_moradores		# Carrega a string moradores
+				jal  mmio_printString		# Imprime a string
+				
+				# Loop para imprimir todos os moradores do apartamento
+				loopPrintAp:
+					bge  $s1, 6, endPrintAp		# Se o contador for maior ou igual a 6, encerra
+					lb   $t2, 0($s0)			# Carrega o primeiro caractere do morador atual
+					beqz $t2, incrementPrintAp	# Se for '\0', incrementa para o proximo morador
+					
+					move $a0, $s0				# Se nao for 0, imprime o morador atual
+					jal  mmio_printString		# imprime o morador atual
+					la   $a0, newLine			# carrega o caractere de newLine
+					jal  mmio_printString		# imprime o caractere de newLine
+					
+					# Incrementa o index do morador
+					incrementPrintAp:
+						addi $s1, $s1, 1		# Incrementa o contador de moradores
+						addi $s0, $s0, 25		# Incrementa o index do morador
+						b    loopPrintAp		# Recomeca o loop
+					
+			endPrintAp:
+				b restart	# Reinicia o programa
 			
 		# Bloco de infoGeral (Finalizado)
 		infoGeral:
