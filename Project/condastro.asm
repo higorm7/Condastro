@@ -137,6 +137,11 @@ main:
 			sw   $t3, 0($t2)		# Armazena a quantidade de moradores 
 			
 			# Adicao do nome do morador no endereco correto
+			move $a0, $s3
+			jal calculateNomeAddress
+			move $a0, $v0
+			li $v0, 1
+			syscall
 			
 			b restart
 			
