@@ -23,3 +23,4 @@
 	full_apart:		.asciiz "Apartamento cheio\n"
 	str_naoVazios:		.asciiz "Nao vazios: "
 	str_vazios:		.asciiz "Vazios: "
+	newLine:		.asciiz "\n"
