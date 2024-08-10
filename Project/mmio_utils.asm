@@ -24,7 +24,7 @@ clearOptions:
     ori $t2, $zero, 150		# Carrega o tamanho do buffer em $t2
     ori $t1, $zero, 0		# Inicializa o contador em 0
     
-    # LaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§o de limpeza do buffer
+    # Laco de limpeza do buffer
 	clear:
     	beq  $t1, $t2, end_clear 	# Se o contador atingir 150, encerrar
     	sb   $zero, 0($t0)        	# Armazena zero no index do buffer
@@ -663,3 +663,27 @@ calculateModeloMotoAddress:
 	move $v0, $t3	# Retorna $t3 (offset)
 	jr   $ra	# Retorna para a funcao que o chamou
 	
+
+# Subprograma:		clearAddress
+# Proposito:		Zerar um espaco de memoria
+# Input:			$a0 - endereco de memoria a zerar
+#					$a1 - quantidade de bytes a zerar
+# Retorno:			Nao se aplica	
+# Side effects:		Nao se aplica
+.text
+clearAddress:
+    move  $t0, $a0			# Copia o endereco de $a0 em $t0
+    move  $t2, $a1			# Carrega o tamanho do buffer em $t2
+    ori   $t1, $zero, 0		# Inicializa o contador em 0
+    
+    # Laco de limpeza do buffer
+	clearAddr:
+    	beq  $t1, $t2, end_clearAddr	# Se o contador atingir 150, encerrar
+    	sb   $zero, 0($t0)        		# Armazena zero no index do buffer
+    	addi $t0, $t0, 1        		# Avanca para o proximo caractere
+    	addi $t1, $t1, 1        		# Incrementa o contador
+    	b    clearAddr					# Reinicia o loop
+    
+	end_clearAddr:
+    	jr   $ra						# Retorna para o programa que o chamou
+

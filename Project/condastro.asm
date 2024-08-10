@@ -164,18 +164,71 @@ main:
 			
 			b restart
 			
+			
 		# Bloco de rmvMorador
 		rmvMorador:
 			move $a0, $s1		# Utiliza a string de comando como parametro para getOptions
 			jal  getOptions		# Obtem as options
-			move $s2, $v0		# Armazena o endereco das options em $s2
+			move $s0, $v0		# Armazena o endereco das options em $s2
 			
-			move $a0, $s2				# Utiliza o endereco das options como parametro para countOptions
+			move $a0, $s0				# Utiliza o endereco das options como parametro para countOptions
 			jal  countOptions			# Conta a quantidade de options
 			move $t0, $v0				# Armazena em $t0 a quantidade de options
 			bne  $t0, 2, errorInvalidOptions	# Se houver mais que duas options, imprime erro de Options
 			
-			b restart
+			# Converte strings numericas para inteiros
+			move $a0, $s0					# Passa $s2 como parametro para optionToInt
+			jal  optionToInt				# Transforma o valor contido na primeira option em inteiro
+			move $s3, $v0					# Armazena o retorno em $s3
+			beqz $s3, errorInvalidOptions	# Se o retorno for igual a 0, houve erro de caracteres
+			
+			# Erro de apartamento invalido
+			move $a0, $s3						# Move o inteiro para o parametro de checkValidApartment
+			jal  checkValidApartment			# Checa se o apartamento e valido
+			move $t1, $v0						# Armazena o valor retornado em $t1
+			beqz $t1, errorInvalidApartment		# Se o valor retornado for 0, indica erro de apartamento invalido
+			
+			# Calcula o endereco do apartamento em nomes
+			move $a0, $s3				# Usa o numero do apartamento como parametro de calculateNomeAddress
+			jal  calculateNomeAddress	# Calcula o endereco do apartamento para armazenamento dos nomes
+			la   $s4, nomes_moradores	# Armazena o endereco de nomes_moradores em $t0
+			add  $s4, $s4, $v0			# Move ate o index retornado por calculateNomeAddress
+			
+			addi $s0, $s0, 25			# Incrementa o index de options (obtem option 2)
+			
+			li $s2, 0					# Inicializa o contador de nomes
+			b  loopFindToExclude		# jump para o loop de encontrar para remover
+			
+			incrementToExclude:
+				addi $s4, $s4, 25		# Incrementa o index de nomes
+			loopFindToExclude:
+				beq  $s2, 6, errorMoradorNaoEncontrado	# Se for passado por 6 nomes e nao encontrado, jump para erro
+				
+				move $a0, $s4			# Usa o endereco do nome encontrador como parametro
+				move $a1, $s0			# Usa o endereco da option como parametro
+				jal  strcmp				# Compara as duas strings
+				beqz $v0, initClear		# Se as strings forem iguais, inicializa o processo de limpeza do endereco
+
+				addi $s2, $s2, 1		# incrementa o contador de nomes
+				b    incrementToExclude	# Incrementa o index de nomes
+			
+			initClear:
+				move $a0, $s4		# usa o endereco do nome para excluir
+				li   $a1, 25		# Indica a exclusao de 25 caracteres
+				jal  clearAddress	# exclui os 25 caracteres
+				
+				# Bloco para decrementar o numero de moradores
+				move $a0, $s3				# Usa o numero do ap como argumento
+				jal  calculateApartAddress	# Calcula o endereco do ap
+				move $t0, $v0				# Armazena o offset em $t0
+				la   $t1, moradores			# carrega o endereco de quantidade de moradores
+				add  $t1, $t1, $t0			# Incrementa o endereco em offset bytes
+				lw   $t0, 0($t1)			# Carrega a quantidade de moradores num ap
+				addi $t0, $t0, -1			# Decrementa a quantidade de moradores no ap
+				sw   $t0, 0($t1)			# Armazena a nova quantidade de moradores no ap
+						
+			b restart	# Reinicia o programa
+			
 			
 		# Bloco de addAuto
 		addAuto:
@@ -211,6 +264,7 @@ main:
 			bnez $t2, carro					# Se $t2 nao for 0, jump para carro
 			bnez $t3, moto					# Se $t3 nao for 0, jump para moto
 			
+			# Bloco de adicao de motos
 			moto:
 				move $a0, $s1				# Usa o numero do ap como parametro
 				jal  calculateModeloMotoAddress	# calcula o endereco de motos_modelos
@@ -242,6 +296,7 @@ main:
 				
 				b endAddAuto
 				
+			# bloco de adicao de carros
 			carro:
 				# Armazena o modelo do carro
 				move $a0, $s1				# Usa o numero do apartamento como parametro
@@ -558,6 +613,12 @@ main:
 		# Erro de numero maximo de automoveis
 		errorMaxAuto:
 			la  $a0, maxAuto
+			jal mmio_printString
+			b   restart
+			
+		# Erro de morador nao encontrado	
+		errorMoradorNaoEncontrado:
+			la  $a0, moradorNFound
 			jal mmio_printString
 			b   restart
 		
