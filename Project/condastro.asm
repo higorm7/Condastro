@@ -212,15 +212,40 @@ main:
 			bnez $t3, moto					# Se $t3 nao for 0, jump para moto
 			
 			moto:
-				li $v0, 4
-				la $a0, str_moto
-				syscall
+				move $a0, $s1				# Usa o numero do ap como parametro
+				jal  calculateModeloMotoAddress	# calcula o endereco de motos_modelos
+				move $t0, $v0				# Armazena o retorno em $t0
+				la   $s3, motos_modelos		# Armazena o endereco de motos_modelos
+				add  $s3, $s3, $t0			# Move para o index informado pelo offset
+				
+				move $a0, $s1				# Usa o numero do ap como parametro
+				jal  calculateMotoAddress	# calcula o endereco de motos
+				move $t1, $v0				# Armazena o retorno em t1
+				la   $s4, motos				# Carrega o endereco de motos
+				add  $s4, $s4, $t1			# Incrementa o endereco com o offset
+				
+				lb   $t4, 0($s3)			# Carrega o primeiro caractere de motos_modelos
+				beqz $t4, storeMoto			# Se estiver vazio, armazena a moto
+				addi $s3, $s3, 10			# Se nao estiver, passa para a proxima vaga
+				addi $s4, $s4, 8			# Se nao estiver, passa para a proxima vaga
+				
+				storeMoto:
+					addi $s0, $s0, 25		# Incrementa options: obtem option 3		
+					move $a0, $s3			# passa o endereco de motos_modelos para strcpy
+					move $a1, $s0			# passa o modelo da moto para copia em motos
+					jal  strcpy				# copia o modelo da moto em motos
+					
+					addi $s0, $s0, 25		# decrementa options: obtem option 4
+					move $a0, $s4			# passa o endereco de motos para strcpy
+					move $a1, $s0			# passa a placa da moto para copia em motos
+					jal  strcpy				# Copia a placa da moto em motos
+				
 				b endAddAuto
 				
 			carro:
 				# Armazena o modelo do carro
 				move $a0, $s1				# Usa o numero do apartamento como parametro
-				jal  calculateModeloAddress	# Calcula o endereco de carros
+				jal  calculateModeloAddress	# Calcula o endereco de carros_modelos
 				move $t0, $v0				# Armazena o retorno em $t0
 				la   $t1, carros_modelos	# Armazena o endereco de carros_modelos em $t1
 				add  $t1, $t1, $t0			# Incrementa para o index informado pelo offset
@@ -328,7 +353,7 @@ main:
 				
 				# Loop para imprimir todos os moradores do apartamento
 				loopPrintAp:
-					bge  $s1, 6, printCarros		# Se o contador for maior ou igual a 6, encerra
+					bge  $s1, 6, printCarros	# Se o contador for maior ou igual a 6, encerra
 					lb   $t2, 0($s0)			# Carrega o primeiro caractere do morador atual
 					beqz $t2, incrementPrintAp	# Se for '\0', incrementa para o proximo morador
 					
@@ -357,7 +382,7 @@ main:
 					
 					# Se o endereco for vazio, ignora a impressao
 					lb   $t0, 0($s0)		# carrega o primeiro caractere de modelos_carros
-					beqz $t0, endPrintAp	# Se for nulo, finaliza a impressao
+					beqz $t0, printMotos	# Se for nulo, finaliza a impressao
 				
 					# Calcula o offset de modelos
 					move $a0, $s3				# usa o numero de ap como argumento
@@ -384,6 +409,48 @@ main:
 					la $a0, newLine
 					jal mmio_printString
 					
+				printMotos:
+					la   $s0, motos_modelos		# Carrega o endereco de modelos_motos
+					la   $s1, motos				# carrega o endereco de motos
+				
+					# calcula o offset de modelos
+					move $a0, $s3				# Usa o numero de ap como argumento
+					jal  calculateModeloAddress	# Obtem o offset de modelo
+					add  $s0, $s0, $v0			# Incrementa o index de motos_modelos
+					
+					lb   $t0, 0($s0)			# carrega o primeiro caractere da primeira vaga
+					lb   $t1, 8($s0)			# carrega o primeiro caractere da segunda vaga
+					or   $t2, $t0, $t1			# aplica or nos dois caracteres
+					
+					beqz $t2, endPrintAp		# Se forem zero, nada e impresso
+					beqz $t0, printMoto2		# Se a primeira vaga estiver vazia, imprime a segunda
+				
+					la   $a0, str_moto		# Carrega str_moto
+					jal  mmio_printString	# imprime str_moto
+					move $a0, $s0			# Usa o endereco de modelos_motos para impressao
+					jal  mmio_printString	# Imprime o modelo
+					la   $a0, slash			# carrega o /
+					jal  mmio_printString	# imprime o /
+					move $a0, $s1			# carrega o endereco de motos para impressao
+					jal  mmio_printString	# Imprime a placa da moto
+					la   $a0, newLine
+					jal  mmio_printString
+					
+					addi $s0, $s0, 10		# incrementa para a segunda vaga
+					addi $s1, $s1, 8		# incrementa para a placa da segunda vaga
+					
+					lb   $t0, 0($s0)
+					beqz $t0, endPrintAp
+					
+					printMoto2:
+						move $a0, $s0			# Usa o endereco de modelos_motos para impressao
+						jal  mmio_printString	# Imprime o modelo
+						la   $a0, slash			# carrega o /
+						jal  mmio_printString	# imprime o /
+						move $a0, $s1			# carrega o endereco de motos para impressao
+						jal  mmio_printString	# Imprime a placa da moto
+						la   $a0, newLine 		# Carrega \n
+						jal  mmio_printString	# Imprime \n
 					
 			endPrintAp:
 				b restart	# Reinicia o programa
@@ -487,6 +554,12 @@ main:
 			la  $a0, tipoInvalido
 			jal mmio_printString
 			b   restart
+			
+		# Erro de numero maximo de automoveis
+		errorMaxAuto:
+			la  $a0, maxAuto
+			jal mmio_printString
+			b   restart
 		
 		# Erro de opcoes invalidas
 		errorInvalidOptions:
@@ -508,8 +581,8 @@ main:
 	nomes_moradores: .space 3600	# Array que contem os nomes dos moradores de um apartamento (24 * 6 * 25)
 	carros_modelos:  .space 240		# Array que contem os nomes dos carros de um apartamento (24 aps * 10 caracteres)
 	carros:			 .space 192		# Array que contem os carros dos apartamentos (24 aps * 8 digitos da placa)
-	motos:			 .space 576		# Array que contem as motos dos apartamentos (24 aps * 3 motos * 8 digitos da placa)
-	motos_modelos:	 .space 720		# Array que contem os modelos das motos de um apartamento (24 aps * 3 motos * 10 caracteres)
+	motos:			 .space 384		# Array que contem as motos dos apartamentos (24 aps * 2 motos * 8 digitos da placa)
+	motos_modelos:	 .space 480		# Array que contem os modelos das motos de um apartamento (24 aps * 2 motos * 10 caracteres)
 	
 
 .include "mmio_utils.asm"

@@ -617,4 +617,49 @@ calculateModeloAddress:
 	move $v0, $t3	# Retorna $t3 (offset)
 	jr   $ra	# Retorna para a funcao que o chamou
 	
+
+# Subprograma:		calculateMotoAddress
+# Proposito:		Calcula o endereco de motos de um apartamento
+# Input:			$a0 - numero do apartamento
+# Retorno:			$v0 - offset
+# Side effects:		Nao se aplica
+.text
+calculateMotoAddress:
+	move $t0, $a0		# Armazena o valor de $a0 em $t0
+	
+	div  $t0, $t0, 100	# Obtem o andar do apartamento
+	mflo $t1		# Move o andar para t1
+	mfhi $t2		# Move o numero de apartamento para t2
+	
+	addi $t1, $t1, -1	# Decrementa 1 do andar
+	mul  $t1, $t1, 32	# Multiplica por 16
+	addi $t2, $t2, -1	# Decrementa o numero do apartamento
+	mul  $t2, $t2, 16	# Multiplica pelo tamanho do inteiro (4 bytes)
+	add  $t3, $t1, $t2	# Acumula os dois valores em $t1	
+
+	move $v0, $t3	# Retorna $t3 (offset)
+	jr   $ra	# Retorna para a funcao que o chamou
+	
+
+# Subprograma:		calculateModeloMotoAddress
+# Proposito:		Calcula o endereco de motos_modelo de um apartamento
+# Input:			$a0 - numero do apartamento
+# Retorno:			$v0 - offset
+# Side effects:		Nao se aplica
+.text
+calculateModeloMotoAddress:
+	move $t0, $a0		# Armazena o valor de $a0 em $t0
+	
+	div  $t0, $t0, 100	# Obtem o andar do apartamento
+	mflo $t1		# Move o andar para t1
+	mfhi $t2		# Move o numero de apartamento para t2
+	
+	addi $t1, $t1, -1	# Decrementa 1 do andar
+	mul  $t1, $t1, 40	# Multiplica por 16
+	addi $t2, $t2, -1	# Decrementa o numero do apartamento
+	mul  $t2, $t2, 20	# Multiplica pelo tamanho do inteiro (4 bytes)
+	add  $t3, $t1, $t2	# Acumula os dois valores em $t1	
+
+	move $v0, $t3	# Retorna $t3 (offset)
+	jr   $ra	# Retorna para a funcao que o chamou
 	

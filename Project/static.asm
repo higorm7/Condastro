@@ -31,4 +31,5 @@
 	str_carro:		.asciiz "Carro:\n"
 	str_moto:		.asciiz "Moto:\n"
 	slash:			.asciiz " / "
+	maxAuto:		.asciiz "Falha: AP com numero maximo de automoveis\n"
 	
