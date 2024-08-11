@@ -232,7 +232,7 @@ main:
 			
 			
 		# Bloco de addAuto
-		addAuto:
+		addAuto:		
 			move $a0, $s1		# Utiliza a string de comando como parametro para getOptions
 			jal  getOptions		# Obtem as options
 			move $s0, $v0		# Armazena o endereco das options em $s2
@@ -267,6 +267,14 @@ main:
 			
 			# Bloco de adicao de motos
 			moto:
+				move $a0, $s1				# Usa o numero do apartamento como parametro
+				jal  calculateModeloAddress	# Calcula o endereco de carros_modelos
+				move $t0, $v0				# Armazena o retorno em $t0
+				la   $t1, carros_modelos	# Armazena o endereco de carros_modelos em $t1
+				add  $t1, $t1, $t0			# Incrementa para o index informado pelo offset
+				lb   $t2, 0($t1)			# carrega o primeiro caractere do modelo
+				bnez $t2, errorMaxAuto		# se ja houver carro cadastrado, retorna erro de quantidade maxima
+				
 				move $a0, $s1				# Usa o numero do ap como parametro
 				jal  calculateModeloMotoAddress	# calcula o endereco de motos_modelos
 				move $t0, $v0				# Armazena o retorno em $t0
@@ -280,6 +288,9 @@ main:
 				add  $s4, $s4, $t1			# Incrementa o endereco com o offset
 				
 				lb   $t4, 0($s3)			# Carrega o primeiro caractere de motos_modelos
+				lb   $t5, 10($s3)			# Carrega o caractere do segundo modelos
+				and  $t5, $t5, $t4			# Aplica and nos dois
+				bnez $t5, errorMaxAuto		# se os dois estiverem ocupados, indica erro de maximo de automoveis
 				beqz $t4, storeMoto			# Se estiver vazio, armazena a moto
 				addi $s3, $s3, 10			# Se nao estiver, passa para a proxima vaga
 				addi $s4, $s4, 8			# Se nao estiver, passa para a proxima vaga
@@ -299,12 +310,25 @@ main:
 				
 			# bloco de adicao de carros
 			carro:
+				move $a0, $s1				# Usa o numero do ap como parametro
+				jal  calculateModeloMotoAddress	# calcula o endereco de motos_modelos
+				move $t0, $v0				# Armazena o retorno em $t0
+				la   $s3, motos_modelos		# Armazena o endereco de motos_modelos
+				add  $s3, $s3, $t0			# Move para o index informado pelo offset
+			
+				lb   $t0, 0($s3)
+				lb   $t1, 10($s3) 
+				or   $t1, $t1, $t0
+				bnez $t1, errorMaxAuto
+				
 				# Armazena o modelo do carro
 				move $a0, $s1				# Usa o numero do apartamento como parametro
 				jal  calculateModeloAddress	# Calcula o endereco de carros_modelos
 				move $t0, $v0				# Armazena o retorno em $t0
 				la   $t1, carros_modelos	# Armazena o endereco de carros_modelos em $t1
 				add  $t1, $t1, $t0			# Incrementa para o index informado pelo offset
+				lb   $t2, 0($t1)			# carrega o primeiro caractere do modelo
+				bnez $t2, errorMaxAuto		# se ja houver carro cadastrado, retorna erro de quantidade maxima
 				addi $s0, $s0, 25			# Incrementa as options para o index da option 3
 				move $a0, $t1				# Passa o endereco de carros com o offset para copia em strcpy
 				move $a1, $s0				# passa o endereco da option 4 para copia em strcpy
