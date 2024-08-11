@@ -412,12 +412,13 @@ main:
 			jal  calculateMotoAddress	# Calcula o offset
 			move $t1, $v0				# Armazena o offset em $t1
 			la   $t0, motos				# Carrega o endereco de motos
-			add  $t0, $t0, $t1			# Incrementa o endereco de carros em offset bytes
+			add  $t0, $t0, $t1			# Incrementa o endereco de motos em offset bytes
 			move $a0, $t0				# Usa carros como parametro para limpar
-			li   $a1, 16				# Carrega 16 bytes (uma placa) para limpeza
+			li   $a1, 16				# Carrega 16 bytes (duas placas) para limpeza
 			jal  clearAddress			# Limpa o endereco solicitado
 			
 			b restart
+			
 			
 		# Bloco de infoAp
 		infoAp:
@@ -643,12 +644,39 @@ main:
 			syscall
 			
 			b restart
-			
-		# Bloco de formatar o arquivo
+		
+		
+		# Bloco de reiniciar os blocos de memoria
 		formatar:
-			li $v0, 4
-			la $a0, cmd_10
-			syscall
+			# Formata a quantidade de moradores
+			la  $a0, moradores
+			li  $a1, 96
+			jal clearAddress
+			
+			# Formata os nomes dos moradores
+			la  $a0, nomes_moradores
+			li  $a1, 3600
+			jal clearAddress
+			
+			# Formata carros_modelos
+			la  $a0, carros_modelos
+			li  $a1, 240
+			jal clearAddress
+			
+			# Formata carros
+			la  $a0, carros
+			li  $a1, 192
+			jal clearAddress
+			
+			# Formata motos_modelos
+			la  $a0, motos_modelos
+			li  $a1, 480
+			jal clearAddress
+			
+			# Formata motos
+			la  $a0, motos
+			li  $a1, 384
+			jal clearAddress
 			
 			b restart
 			
