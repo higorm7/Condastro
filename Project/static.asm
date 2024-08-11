@@ -33,3 +33,5 @@
 	slash:			.asciiz " / "
 	maxAuto:		.asciiz "Falha: AP com numero maximo de automoveis\n"
 	moradorNFound:  .asciiz "Falha: morador nao encontrado\n"
+	autoNotFound:	.asciiz "Falha: automovel nao encontrado\n"
+	

@@ -284,7 +284,7 @@ main:
 				addi $s3, $s3, 10			# Se nao estiver, passa para a proxima vaga
 				addi $s4, $s4, 8			# Se nao estiver, passa para a proxima vaga
 				
-				storeMoto:
+				storeMoto:	
 					addi $s0, $s0, 25		# Incrementa options: obtem option 3		
 					move $a0, $s3			# passa o endereco de motos_modelos para strcpy
 					move $a1, $s0			# passa o modelo da moto para copia em motos
@@ -380,9 +380,56 @@ main:
 				b    endRmvAuto				# finaliza a remocao do carro
 			
 			compararMoto1:
-			
-			limparMoto2:
-			
+				move $a0, $s1				# Usa o numero do ap para calcular o endereco da moto
+				jal  calculateMotoAddress	# calcula o endereco das motos do ap
+				move $t0, $v0				# armazena o offset em $t0
+				la   $s2, motos				# Carrega o endereco das motos em $s2
+				add  $s2, $s2, $t0			# Incrementa o endereco das motos em offset bytes
+				move $a0, $s2				# usa o endereco da placa para comparar com a option
+				move $a1, $s0				# Usa a option como parametro
+				jal  strcmp					# compara os dois valores
+				beqz $v0, limparMoto1		# Se forem iguais, inicia a remocao
+				b    compararMoto2			# Se nao forem, verifica a segunda moto
+				
+				limparMoto1:
+					move $a0, $s2			# Usa o endereco de motos para limpeza
+					li   $a1, 8				# indica limpeza de 8 bytes (uma placa)
+					jal  clearAddress		# Limpa o endereco de motos
+							
+					move $a0, $s1					# Usa o numero do ap para calcular o endereco de modelo motos
+					jal  calculateModeloMotoAddress	# Calcula o offset
+					move $t0, $v0					# Armazena o offset em $t0
+					la   $s3, motos_modelos			# carrega o endereco de motos modelos
+					add  $s3, $s3, $t0				# Incrementa o endereco de motos modelos em offset bytes
+					move $a0, $s3					# Usa o endereco de motos modelos para limpeza
+					li   $v0, 10					# indica 10 bytes para limpeza (um modelo)
+					jal  clearAddress				# Limpa o endereco
+					b    endRmvAuto					# Finaliza a remocao da moto
+				
+			compararMoto2:
+				addi $s2, $s2, 8	# Incrementa o endereco de motos para a proxima moto
+				move $a0, $s2		# Usa o endereco para comparar com a option	
+				move $a1, $s0		# usa a option para comparacao
+				jal  strcmp			# Compara as duas strings
+				beqz $v0, limparMoto2		# Se forem iguais, remove a moto2
+				b    errorAutoNaoEncontrado	# Se nao forem, nada foi encontrado e retorna o erro
+				
+				limparMoto2:
+					move $a0, $s2		# Usa o endereco da placa para limpeza
+					li   $a1, 8			# Limpa 8 bytes (uma placa)
+					jal  clearAddress	# limpa o endereco
+					
+					move $a0, $s1					# Usa o numero do ap para calcular o endereco de modelo motos
+					jal  calculateModeloMotoAddress	# Calcula o offset
+					move $t0, $v0					# Armazena o offset em $t0
+					la   $s3, motos_modelos			# carrega o endereco de motos modelos
+					add  $s3, $s3, $t0				# Incrementa o endereco de motos modelos em offset bytes
+					addi $s3, $s3, 10				# incrementa para o proximo modelo (moto 2)
+					move $a0, $s3					# Usa o endereco retornado como parametro para clear
+					li   $a1, 10					# indica 10 bytes (um modelo) para limpeza
+					jal  clearAddress				# limpa o endereco solicitado
+				
+			# Reinicia o programa
 			endRmvAuto:
 				b restart
 			
@@ -592,12 +639,16 @@ main:
 					la   $s1, motos				# carrega o endereco de motos
 				
 					# calcula o offset de modelos
-					move $a0, $s3				# Usa o numero de ap como argumento
-					jal  calculateModeloAddress	# Obtem o offset de modelo
-					add  $s0, $s0, $v0			# Incrementa o index de motos_modelos
+					move $a0, $s3					# Usa o numero de ap como argumento
+					jal  calculateModeloMotoAddress	# Obtem o offset de modelo
+					add  $s0, $s0, $v0				# Incrementa o index de motos_modelos
+					
+					move $a0, $s3				# utiliza o numero do ap como argumento
+					jal  calculateMotoAddress	# calcula o endereco de motos
+					add  $s1, $s1, $v0			# Incrementa o endereco em offset bytes
 					
 					lb   $t0, 0($s0)			# carrega o primeiro caractere da primeira vaga
-					lb   $t1, 8($s0)			# carrega o primeiro caractere da segunda vaga
+					lb   $t1, 10($s0)			# carrega o primeiro caractere da segunda vaga
 					or   $t2, $t0, $t1			# aplica or nos dois caracteres
 					
 					beqz $t2, endPrintAp		# Se forem zero, nada e impresso
@@ -770,6 +821,12 @@ main:
 		# Erro de morador nao encontrado	
 		errorMoradorNaoEncontrado:
 			la  $a0, moradorNFound
+			jal mmio_printString
+			b   restart
+			
+		# Erro de automovel nao encontrado
+		errorAutoNaoEncontrado:
+			la  $a0, autoNotFound
 			jal mmio_printString
 			b   restart
 		
