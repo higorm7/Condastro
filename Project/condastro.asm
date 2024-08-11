@@ -340,12 +340,82 @@ main:
 		limparAp:
 			move $a0, $s1		# Utiliza a string de comando como parametro para getOptions
 			jal  getOptions		# Obtem as options
-			move $s2, $v0		# Armazena o endereco das options em $s2
+			move $s0, $v0		# Armazena o endereco das options em $s2
 			
-			move $a0, $s2				# Utiliza o endereco das options como parametro para countOptions
+			move $a0, $s0				# Utiliza o endereco das options como parametro para countOptions
 			jal  countOptions			# Conta a quantidade de options
 			move $t0, $v0				# Armazena em $t0 a quantidade de options
-			bne  $t0, 1, errorInvalidOptions	# Se houver mais que duas options, imprime erro de Options
+			bne  $t0, 1, errorInvalidOptions	# Se houver mais que uma option, imprime erro de Options
+			
+			# Converte strings numericas para inteiros
+			move $a0, $s0					# Passa $s2 como parametro para optionToInt
+			jal  optionToInt				# Transforma o valor contido na primeira option em inteiro
+			move $s1, $v0					# Armazena o retorno em $s3
+			beqz $s1, errorInvalidOptions	# Se o retorno for igual a 0, houve erro de caracteres
+			
+			# Erro de apartamento invalido
+			move $a0, $s1						# Move o inteiro para o parametro de checkValidApartment
+			jal  checkValidApartment			# Checa se o apartamento e valido
+			move $t1, $v0						# Armazena o valor retornado em $t1
+			beqz $t1, errorInvalidApartment		# Se o valor retornado for 0, indica erro de apartamento invalido
+			
+			# Limpar os nomes dos moradores do apartamento
+			move $a0, $s1				# Usa o numero do ap como parametro para encontrar o endereco dos nomes
+			jal  calculateNomeAddress	# Encontra o endereco correto
+			move $t1, $v0				# Armazena o offset em $t1
+			la   $t0, nomes_moradores	# Carrega o endereco de nomes_moradores em $t0
+			add  $t0, $t0, $t1			# Incrementa em offset bytes o endereco de nomes_moradores
+			move $a0, $t0				# Usa o endereco de nomes_moradores como parametro para clear
+			li   $a1, 150				# Serao limpados 150 bytes (6 nomes)
+			jal  clearAddress			# Limpa os nomes
+			
+			# Setar a quantidade de moradores em 0
+			move $a0, $s1				# Usa o numero do ap como parametro para encontrar o endereco da quantidade de moradores	
+			jal  calculateApartAddress	# Calcula o endereco do apartamento
+			move $t0, $v0				# Armazena o offset em $t0
+			la   $t1, moradores			# Carrega o endereco da quantidade de moradores
+			add  $t1, $t1, $t0			# Incrementa em offset bytes 
+			sw   $zero, 0($t1)			# Carrega 0 no espaco correto da memoria
+			
+			# limpar os modelos dos carros presentes no ap
+			move $a0, $s1				# Usa o numero do ap como parametro para encontrar o endereco do carros_modelos
+			jal  calculateModeloAddress	# calcula o endereco solicitado
+			move $t1, $v0				# Armazena o offset em $t1
+			la   $t0, carros_modelos	# Carrega o endereco de carros_modelos
+			add  $t0, $t0, $t1			# Incrementa o index de carros_modelos
+			move $a0, $t0				# Usa o endereco de carros modelos pra clear
+			li   $a1, 10				# Limpeza de 10 byes (um modelo)
+			jal  clearAddress			# Realiza a limpeza
+			
+			# limpar a placa do carro presente no ap
+			move $a0, $s1				# Usa o numero do ap como parametro para encontrar o endereco de carros
+			jal  calculateCarroAddress	# Calcula o offset
+			move $t1, $v0				# Armazena o offset em $t1
+			la   $t0, carros			# Carrega o endereco de carros
+			add  $t0, $t0, $t1			# Incrementa o endereco de carros em offset bytes
+			move $a0, $t0				# Usa carros como parametro para limpar
+			li   $a1, 8					# Carrega 8 bytes (uma placa) para limpeza
+			jal  clearAddress			# Limpa o endereco solicitado
+			
+			# Limpar os modelos das motos
+			move $a0, $s1					# Usa o numero do ap como parametro para encontrar o endereco de modelos_motos
+			jal  calculateModeloMotoAddress	# Calcula o offset
+			move $t1, $v0					# Armazena o offset em $t1
+			la   $t0, motos_modelos			# Carrega o endereco de motos_modelos
+			add  $t0, $t0, $t1				# Incrementa o endereco de motos_modelos em offset bytes
+			move $a0, $t0					# Usa carros como parametro para limpar
+			li   $a1, 20					# Carrega 20 bytes (dois modelos) para limpeza
+			jal  clearAddress				# Limpa o endereco solicitado
+			
+			# Limpar as placas das motos
+			move $a0, $s1				# Usa o numero do ap como parametro para encontrar o endereco de motos
+			jal  calculateMotoAddress	# Calcula o offset
+			move $t1, $v0				# Armazena o offset em $t1
+			la   $t0, motos				# Carrega o endereco de motos
+			add  $t0, $t0, $t1			# Incrementa o endereco de carros em offset bytes
+			move $a0, $t0				# Usa carros como parametro para limpar
+			li   $a1, 16				# Carrega 16 bytes (uma placa) para limpeza
+			jal  clearAddress			# Limpa o endereco solicitado
 			
 			b restart
 			

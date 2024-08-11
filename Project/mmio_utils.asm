@@ -595,8 +595,8 @@ calculateCarroAddress:
 	jr   $ra	# Retorna para a funcao que o chamou
 	
 
-# Subprograma:		calculateCarroAddress
-# Proposito:		Calcula o endereco de carros de um apartamento
+# Subprograma:		calculateModeloAddress
+# Proposito:		Calcula o endereco de modelos_carros de um apartamento
 # Input:			$a0 - numero do apartamento
 # Retorno:			$v0 - offset
 # Side effects:		Nao se aplica
