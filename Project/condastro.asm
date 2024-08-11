@@ -328,14 +328,63 @@ main:
 		rmvAuto:
 			move $a0, $s1		# Utiliza a string de comando como parametro para getOptions
 			jal  getOptions		# Obtem as options
-			move $s2, $v0		# Armazena o endereco das options em $s2
+			move $s0, $v0		# Armazena o endereco das options em $s2
 			
-			move $a0, $s2				# Utiliza o endereco das options como parametro para countOptions
+			move $a0, $s0				# Utiliza o endereco das options como parametro para countOptions
 			jal  countOptions			# Conta a quantidade de options
 			move $t0, $v0				# Armazena em $t0 a quantidade de options
 			bne  $t0, 2, errorInvalidOptions	# Se houver mais que duas options, imprime erro de Options
 			
-			b restart
+			# Converte strings numericas para inteiros
+			move $a0, $s0					# Passa $s0 como parametro para optionToInt
+			jal  optionToInt				# Transforma o valor contido na primeira option em inteiro
+			move $s1, $v0					# Armazena o retorno em $s1
+			beqz $s1, errorInvalidOptions	# Se o retorno for igual a 0, houve erro de caracteres
+			
+			# Erro de apartamento invalido
+			move $a0, $s1						# Move o inteiro para o parametro de checkValidApartment
+			jal  checkValidApartment			# Checa se o apartamento e valido
+			move $t1, $v0						# Armazena o valor retornado em $t1
+			beqz $t1, errorInvalidApartment		# Se o valor retornado for 0, indica erro de apartamento invalido
+			
+			# Obtem o endereco da placa do carro
+			move $a0, $s1				# Usa o numero do ap como parametro para encontrar o endereco de carros
+			jal  calculateCarroAddress	# Calcula o offset de carros
+			move $t1, $v0				# Armazena o offset em $t1
+			la   $s2, carros			# Carrega o endereco de carros
+			add  $s2, $s2, $t1			# Incrementa o endereco de carros em offset bytes
+			addi $s0, $s0, 25			# Incrementa as options para obter a placa
+			
+			# Compara o valor da placa com a options
+			move $a0, $s2	# Valor da placa
+			move $a1, $s0	# Valor da option
+			jal  strcmp		# Compara as duas
+			beqz $v0, limparCarro	# Se forem iguais, limpa o valor do carro
+			b    compararMoto1		# Se nao, compara o valor com o da primeira moto
+			
+			limparCarro:
+				# Limpa a placa do carro
+				move $a0, $s2		# Insere o endereco do carro para limpeza
+				li   $a1, 8			# argumenta 8 bytes (uma placa)
+				jal  clearAddress	# Limpa a placa
+				
+				# Limpa o modelo do carro
+				move $a0, $s1				# Usa o numero do ap como parametro para calcular o endereco do modelo
+				jal  calculateModeloAddress	# Calcula o offset
+				move $t0, $v0				# Armazena o offset em $t0
+				la   $t1, carros_modelos	# Carrega o endereco de carros_modelos
+				add  $t1, $t1, $t0			# Incrementa o endereco de carros_modelos em offset bytes
+				move $a0, $t1				# Usa o endereco de carros_modelos para limpeza
+				li   $a1, 10				# limpa 10 bytes (um modelo)
+				jal  clearAddress			# Realiza a limpeza
+				b    endRmvAuto				# finaliza a remocao do carro
+			
+			compararMoto1:
+			
+			limparMoto2:
+			
+			endRmvAuto:
+				b restart
 			
 		# Bloco de limparAp
 		limparAp:
@@ -562,14 +611,14 @@ main:
 					jal  mmio_printString	# imprime o /
 					move $a0, $s1			# carrega o endereco de motos para impressao
 					jal  mmio_printString	# Imprime a placa da moto
-					la   $a0, newLine
-					jal  mmio_printString
+					la   $a0, newLine		# Carrega \n
+					jal  mmio_printString	# Imprime \n
 					
 					addi $s0, $s0, 10		# incrementa para a segunda vaga
 					addi $s1, $s1, 8		# incrementa para a placa da segunda vaga
 					
-					lb   $t0, 0($s0)
-					beqz $t0, endPrintAp
+					lb   $t0, 0($s0)		# Se não houver uma segunda moto, finaliza a impressao
+					beqz $t0, endPrintAp	# Encerra a impressao
 					
 					printMoto2:
 						move $a0, $s0			# Usa o endereco de modelos_motos para impressao
@@ -583,6 +632,7 @@ main:
 					
 			endPrintAp:
 				b restart	# Reinicia o programa
+			
 			
 		# Bloco de infoGeral (Finalizado)
 		infoGeral:
