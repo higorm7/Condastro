@@ -179,17 +179,17 @@ main:
 			# Converte strings numericas para inteiros
 			move $a0, $s0					# Passa $s2 como parametro para optionToInt
 			jal  optionToInt				# Transforma o valor contido na primeira option em inteiro
-			move $s3, $v0					# Armazena o retorno em $s3
-			beqz $s3, errorInvalidOptions	# Se o retorno for igual a 0, houve erro de caracteres
+			move $s1, $v0					# Armazena o retorno em $s3
+			beqz $s1, errorInvalidOptions	# Se o retorno for igual a 0, houve erro de caracteres
 			
 			# Erro de apartamento invalido
-			move $a0, $s3						# Move o inteiro para o parametro de checkValidApartment
+			move $a0, $s1						# Move o inteiro para o parametro de checkValidApartment
 			jal  checkValidApartment			# Checa se o apartamento e valido
 			move $t1, $v0						# Armazena o valor retornado em $t1
 			beqz $t1, errorInvalidApartment		# Se o valor retornado for 0, indica erro de apartamento invalido
 			
 			# Calcula o endereco do apartamento em nomes
-			move $a0, $s3				# Usa o numero do apartamento como parametro de calculateNomeAddress
+			move $a0, $s1				# Usa o numero do apartamento como parametro de calculateNomeAddress
 			jal  calculateNomeAddress	# Calcula o endereco do apartamento para armazenamento dos nomes
 			la   $s4, nomes_moradores	# Armazena o endereco de nomes_moradores em $t0
 			add  $s4, $s4, $v0			# Move ate o index retornado por calculateNomeAddress
@@ -218,7 +218,7 @@ main:
 				jal  clearAddress	# exclui os 25 caracteres
 				
 				# Bloco para decrementar o numero de moradores
-				move $a0, $s3				# Usa o numero do ap como argumento
+				move $a0, $s1				# Usa o numero do ap como argumento
 				jal  calculateApartAddress	# Calcula o endereco do ap
 				move $t0, $v0				# Armazena o offset em $t0
 				la   $t1, moradores			# carrega o endereco de quantidade de moradores
@@ -226,6 +226,7 @@ main:
 				lw   $t0, 0($t1)			# Carrega a quantidade de moradores num ap
 				addi $t0, $t0, -1			# Decrementa a quantidade de moradores no ap
 				sw   $t0, 0($t1)			# Armazena a nova quantidade de moradores no ap
+				beqz $t0, limparAutos		# Se nao houver mais moradores, exclui os automoveis
 						
 			b restart	# Reinicia o programa
 			
@@ -377,6 +378,8 @@ main:
 			add  $t1, $t1, $t0			# Incrementa em offset bytes 
 			sw   $zero, 0($t1)			# Carrega 0 no espaco correto da memoria
 			
+			# Endpoint para zerar os automoveis caso haja 0 moradores num ap
+			limparAutos:
 			# limpar os modelos dos carros presentes no ap
 			move $a0, $s1				# Usa o numero do ap como parametro para encontrar o endereco do carros_modelos
 			jal  calculateModeloAddress	# calcula o endereco solicitado
