@@ -769,7 +769,7 @@ main:
 			move $s0, $v0			# Armazena o descritor do arquivo em $s0
 			ori  $v0, $zero, 15		# servico 15 indica escrita no arquivo
 			move $a0, $s0			# passa o arquivo para escrita como parametro
-			la   $a1, carros_modelos		# passa o endereco de moradores como parametro para ser escrito
+			la   $a1, nomes_moradores		# passa o endereco de moradores como parametro para ser escrito
 			li   $a2, 240			# numero de bytes a serem escritos
 			syscall					# escreve no arquivo
 			
