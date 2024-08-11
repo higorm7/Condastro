@@ -733,19 +733,263 @@ main:
 				
 			b restart
 			
+			
 		# Bloco de salvar
 		salvar:
-			li $v0, 4
-			la $a0, cmd_8
-			syscall
+			# salva a quantidade de moradores
+			ori $v0, $zero, 13		# Servico 13 abre arquivo
+			la  $a0, moradoresPath	# caminho do arquivo
+    		li  $a1, 1				# flag 1 indica escrita
+			li  $a2, 644			# permite que todos os usuarios escrevam
+	 		syscall					# le o arquivo
+
+			bltz $v0, openFileError	# Se $v0 < 0, houve erro ao abrir o arquivo
+
+			move $s0, $v0			# Armazena o descritor do arquivo em $s0
+			ori  $v0, $zero, 15		# servico 15 indica escrita no arquivo
+			move $a0, $s0			# passa o arquivo para escrita como parametro
+			la   $a1, moradores		# passa o endereco de moradores como parametro para ser escrito
+			li   $a2, 96			# numero de bytes a serem escritos
+			syscall					# escreve no arquivo
+			
+			ori  $v0, $zero, 16		# Servico 16 indica para fechar arquivo
+			move $a0, $s0			# passa o arquivo a fechar como parametro
+			syscall					# fechar o arquivo
+			
+			
+			# salva os nomes dos moradores
+			ori $v0, $zero, 13		# Servico 13 abre arquivo
+			la  $a0, nomesPath		# caminho do arquivo
+    		li  $a1, 1				# flag 1 indica escrita
+			li  $a2, 644			# permite que todos os usuarios escrevam
+	 		syscall					# le o arquivo
+
+			bltz $v0, openFileError	# Se $v0 < 0, houve erro ao abrir o arquivo
+
+			move $s0, $v0			# Armazena o descritor do arquivo em $s0
+			ori  $v0, $zero, 15		# servico 15 indica escrita no arquivo
+			move $a0, $s0			# passa o arquivo para escrita como parametro
+			la   $a1, carros_modelos		# passa o endereco de moradores como parametro para ser escrito
+			li   $a2, 240			# numero de bytes a serem escritos
+			syscall					# escreve no arquivo
+			
+			ori  $v0, $zero, 16		# Servico 16 indica para fechar arquivo
+			move $a0, $s0			# passa o arquivo a fechar como parametro
+			syscall					# fechar o arquivo
+			
+			
+			# salva o conteudo de carros_modelos
+			ori $v0, $zero, 13		# Servico 13 abre arquivo
+			la  $a0, carrosMPath	# caminho do arquivo
+    		li  $a1, 1				# flag 1 indica escrita
+			li  $a2, 644			# permite que todos os usuarios escrevam
+	 		syscall					# le o arquivo
+
+			bltz $v0, openFileError	# Se $v0 < 0, houve erro ao abrir o arquivo
+
+			move $s0, $v0			# Armazena o descritor do arquivo em $s0
+			ori  $v0, $zero, 15		# servico 15 indica escrita no arquivo
+			move $a0, $s0			# passa o arquivo para escrita como parametro
+			la   $a1, carros_modelos		# passa o endereco de moradores como parametro para ser escrito
+			li   $a2, 240			# numero de bytes a serem escritos
+			syscall					# escreve no arquivo
+			
+			ori  $v0, $zero, 16		# Servico 16 indica para fechar arquivo
+			move $a0, $s0			# passa o arquivo a fechar como parametro
+			syscall					# fechar o arquivo
+			
+			# salva o conteudo de carros
+			ori $v0, $zero, 13		# Servico 13 abre arquivo
+			la  $a0, carrosPath		# caminho do arquivo
+    		li  $a1, 1				# flag 1 indica escrita
+			li  $a2, 644			# permite que todos os usuarios escrevam
+	 		syscall					# le o arquivo
+
+			bltz $v0, openFileError	# Se $v0 < 0, houve erro ao abrir o arquivo
+
+			move $s0, $v0			# Armazena o descritor do arquivo em $s0
+			ori  $v0, $zero, 15		# servico 15 indica escrita no arquivo
+			move $a0, $s0			# passa o arquivo para escrita como parametro
+			la   $a1, carros		# passa o endereco de moradores como parametro para ser escrito
+			li   $a2, 192			# numero de bytes a serem escritos
+			syscall					# escreve no arquivo
+			
+			ori  $v0, $zero, 16		# Servico 16 indica para fechar arquivo
+			move $a0, $s0			# passa o arquivo a fechar como parametro
+			syscall					# fechar o arquivo
+			
+			
+			# salva o conteudo de motos_modelos
+			ori $v0, $zero, 13		# Servico 13 abre arquivo
+			la  $a0, motosMPath		# caminho do arquivo
+    		li  $a1, 1				# flag 1 indica escrita
+			li  $a2, 644			# permite que todos os usuarios escrevam
+	 		syscall					# le o arquivo
+
+			bltz $v0, openFileError	# Se $v0 < 0, houve erro ao abrir o arquivo
+
+			move $s0, $v0			# Armazena o descritor do arquivo em $s0
+			ori  $v0, $zero, 15		# servico 15 indica escrita no arquivo
+			move $a0, $s0			# passa o arquivo para escrita como parametro
+			la   $a1, motos_modelos		# passa o endereco de moradores como parametro para ser escrito
+			li   $a2, 480			# numero de bytes a serem escritos
+			syscall					# escreve no arquivo
+			
+			ori  $v0, $zero, 16		# Servico 16 indica para fechar arquivo
+			move $a0, $s0			# passa o arquivo a fechar como parametro
+			syscall					# fechar o arquivo
+			
+			
+			# salva o conteudo de motos
+			ori $v0, $zero, 13		# Servico 13 abre arquivo
+			la  $a0, motosPath	# caminho do arquivo
+    		li  $a1, 1				# flag 1 indica escrita
+			li  $a2, 644			# permite que todos os usuarios escrevam
+	 		syscall					# le o arquivo
+
+			bltz $v0, openFileError	# Se $v0 < 0, houve erro ao abrir o arquivo
+
+			move $s0, $v0			# Armazena o descritor do arquivo em $s0
+			ori  $v0, $zero, 15		# servico 15 indica escrita no arquivo
+			move $a0, $s0			# passa o arquivo para escrita como parametro
+			la   $a1, motos			# passa o endereco de moradores como parametro para ser escrito
+			li   $a2, 384			# numero de bytes a serem escritos
+			syscall					# escreve no arquivo
+			
+			ori  $v0, $zero, 16		# Servico 16 indica para fechar arquivo
+			move $a0, $s0			# passa o arquivo a fechar como parametro
+			syscall					# fechar o arquivo
+			
 			
 			b restart
 			
+			
 		# Bloco de recarregar
 		recarregar:
-			li $v0, 4
-			la $a0, cmd_9
-			syscall
+			# Recupera a quantidade de moradores
+			ori $v0, $zero, 13		# Servico 13 abre arquivo
+			la  $a0, moradoresPath	# caminho do arquivo
+    		li  $a1, 0				# flag 0 indica leitura
+	 		syscall					# le o arquivo
+
+   	 		bltz $v0, openFileError	# Verifica se houve erro ao abrir o arquivo
+
+			move $s0, $v0			# Armazena o arquivo em $s0
+
+			ori  $v0, $zero, 14		# servico 14 indica leitura de arquivo
+			move $a0, $s0			# Passa o arquivo aberto como parametro
+			la   $a1, moradores		# endereco a ser armazenado o conteudo
+			li   $a2, 96			# numero de bytes a serem lidos
+			syscall					# realiza a leitura
+
+    		ori $v0, $zero, 16		# Servico 16 indica fechar arquivo
+    		move $a0, $s0			# Passa o arquivo para fechar
+			syscall					# Fecha o arquivo
+			
+			
+			# Recupera os nomes dos moradores
+			ori $v0, $zero, 13		# Servico 13 abre arquivo
+			la  $a0, nomesPath		# caminho do arquivo
+    		li  $a1, 0				# flag 0 indica leitura
+	 		syscall					# le o arquivo
+
+   	 		bltz $v0, openFileError	# Verifica se houve erro ao abrir o arquivo
+
+			move $s0, $v0			# Armazena o arquivo em $s0
+
+			ori  $v0, $zero, 14		# servico 14 indica leitura de arquivo
+			move $a0, $s0			# Passa o arquivo aberto como parametro
+			la   $a1, nomes_moradores		# endereco a ser armazenado o conteudo
+			li   $a2, 3600			# numero de bytes a serem lidos
+			syscall					# realiza a leitura
+
+    		ori $v0, $zero, 16		# Servico 16 indica fechar arquivo
+    		move $a0, $s0			# Passa o arquivo para fechar
+			syscall					# Fecha o arquivo
+			
+			
+			# Recupera o conteudo de carros
+			ori $v0, $zero, 13		# Servico 13 abre arquivo
+			la  $a0, carrosPath	# caminho do arquivo
+    		li  $a1, 0				# flag 0 indica leitura
+	 		syscall					# le o arquivo
+
+   	 		bltz $v0, openFileError	# Verifica se houve erro ao abrir o arquivo
+
+			move $s0, $v0			# Armazena o arquivo em $s0
+
+			ori  $v0, $zero, 14		# servico 14 indica leitura de arquivo
+			move $a0, $s0			# Passa o arquivo aberto como parametro
+			la   $a1, carros		# endereco a ser armazenado o conteudo
+			li   $a2, 192			# numero de bytes a serem lidos
+			syscall					# realiza a leitura
+
+    		ori $v0, $zero, 16		# Servico 16 indica fechar arquivo
+    		move $a0, $s0			# Passa o arquivo para fechar
+			syscall					# Fecha o arquivo
+			
+			
+			# Recupera o conteudo de carros_modelos
+			ori $v0, $zero, 13		# Servico 13 abre arquivo
+			la  $a0, carrosMPath	# caminho do arquivo
+    		li  $a1, 0				# flag 0 indica leitura
+	 		syscall					# le o arquivo
+
+   	 		bltz $v0, openFileError	# Verifica se houve erro ao abrir o arquivo
+
+			move $s0, $v0			# Armazena o arquivo em $s0
+
+			ori  $v0, $zero, 14		# servico 14 indica leitura de arquivo
+			move $a0, $s0			# Passa o arquivo aberto como parametro
+			la   $a1, carros_modelos	# endereco a ser armazenado o conteudo
+			li   $a2, 240			# numero de bytes a serem lidos
+			syscall					# realiza a leitura
+
+    		ori $v0, $zero, 16		# Servico 16 indica fechar arquivo
+    		move $a0, $s0			# Passa o arquivo para fechar
+			syscall					# Fecha o arquivo
+			
+			
+			# Recupera o conteudo de motos
+			ori $v0, $zero, 13		# Servico 13 abre arquivo
+			la  $a0, motosPath		# caminho do arquivo
+    		li  $a1, 0				# flag 0 indica leitura
+	 		syscall					# le o arquivo
+
+   	 		bltz $v0, openFileError	# Verifica se houve erro ao abrir o arquivo
+
+			move $s0, $v0			# Armazena o arquivo em $s0
+
+			ori  $v0, $zero, 14		# servico 14 indica leitura de arquivo
+			move $a0, $s0			# Passa o arquivo aberto como parametro
+			la   $a1, motos		# endereco a ser armazenado o conteudo
+			li   $a2, 384			# numero de bytes a serem lidos
+			syscall					# realiza a leitura
+
+    		ori $v0, $zero, 16		# Servico 16 indica fechar arquivo
+    		move $a0, $s0			# Passa o arquivo para fechar
+			syscall					# Fecha o arquivo
+			
+			
+			# Recupera a quantidade de moradores
+			ori $v0, $zero, 13		# Servico 13 abre arquivo
+			la  $a0, motosMPath	# caminho do arquivo
+    		li  $a1, 0				# flag 0 indica leitura
+	 		syscall					# le o arquivo
+
+   	 		bltz $v0, openFileError	# Verifica se houve erro ao abrir o arquivo
+
+			move $s0, $v0			# Armazena o arquivo em $s0
+
+			ori  $v0, $zero, 14		# servico 14 indica leitura de arquivo
+			move $a0, $s0			# Passa o arquivo aberto como parametro
+			la   $a1, motos_modelos		# endereco a ser armazenado o conteudo
+			li   $a2, 240			# numero de bytes a serem lidos
+			syscall					# realiza a leitura
+
+    		ori $v0, $zero, 16		# Servico 16 indica fechar arquivo
+    		move $a0, $s0			# Passa o arquivo para fechar
+			syscall					# Fecha o arquivo
 			
 			b restart
 		
@@ -827,6 +1071,12 @@ main:
 		# Erro de automovel nao encontrado
 		errorAutoNaoEncontrado:
 			la  $a0, autoNotFound
+			jal mmio_printString
+			b   restart
+			
+		# Erro de abertura de arquivo
+		errorOpenArquivo:
+			la  $a0, openFileError
 			jal mmio_printString
 			b   restart
 		

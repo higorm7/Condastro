@@ -34,4 +34,12 @@
 	maxAuto:		.asciiz "Falha: AP com numero maximo de automoveis\n"
 	moradorNFound:  .asciiz "Falha: morador nao encontrado\n"
 	autoNotFound:	.asciiz "Falha: automovel nao encontrado\n"
+	moradoresPath:	.asciiz "/home/higor/Applications/MARS/Proj/Condastro/Project/files/moradores.txt"
+	nomesPath:		.asciiz "/home/higor/Applications/MARS/Proj/Condastro/Project/files/nomes.txt"
+	carrosMPath:	.asciiz "/home/higor/Applications/MARS/Proj/Condastro/Project/files/carros_modelos.txt"
+	carrosPath:		.asciiz "/home/higor/Applications/MARS/Proj/Condastro/Project/files/carros.txt"
+	motosMPath:		.asciiz "/home/higor/Applications/MARS/Proj/Condastro/Project/files/motos_modelos.txt"
+	motosPath:		.asciiz "/home/higor/Applications/MARS/Proj/Condastro/Project/files/motos.txt"
+	openFileError: 	.asciiz "Erro ao abrir o arquivo.\n"
+	
 	
