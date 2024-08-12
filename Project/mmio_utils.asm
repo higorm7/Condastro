@@ -687,3 +687,26 @@ clearAddress:
 	end_clearAddr:
     	jr   $ra						# Retorna para o programa que o chamou
 
+
+# Subprograma:		getApNumber
+# Proposito:		Obter um numero de ap baseado no inteito de 1 a 24 fornecido
+# Input:			$a0 - numero fornecido
+# Retorno:			$v0 - numero do ap
+# Side effects:		Nao se aplica
+.text
+getApNumber:
+	move $t0, $a0		# Copia o valor de $a0 em $t0
+	
+	sub  $t0, $t0, 1	# subtrai 1 do valor de input
+	div  $t1, $t0, 2	# Divide por 2 para obter o andar
+	mflo $t1			# armazena o quociente em t1
+	addi $t1, $t1, 1	# incrementa o andar (comeca em 10...)
+    
+	rem  $t2, $t0, 2	# Calcula n % 2 para determinar se e o primeiro ou segundo ap
+	addi $t2, $t2, 1	# incrementa o valor em 1
+    
+	mul $t3, $t1, 100 	# Multiplica o andar por 100
+	add $t3, $t3, $t2	# adiciona o numero do ap
+	move $v0, $t3		# copia o numero do ap como retorno
+    
+    jr $ra				# retorna para a funcao origem

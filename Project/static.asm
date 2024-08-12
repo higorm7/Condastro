@@ -41,5 +41,6 @@
 	motosMPath:		.asciiz "/home/higor/Applications/MARS/Proj/Condastro/Project/files/motos_modelos.txt"
 	motosPath:		.asciiz "/home/higor/Applications/MARS/Proj/Condastro/Project/files/motos.txt"
 	openFileError: 	.asciiz "Erro ao abrir o arquivo.\n"
-	
+	all:			.asciiz "all"
+	apVazioError:	.asciiz "Falha: ap nao possui moradores\n"
 	

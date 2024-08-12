@@ -1,3 +1,10 @@
+# Arquivo:		condastro.asm
+# Proposito: 	Projeto do sistema de cadastro de condominio solicitado para a 1 VA
+# Autores: 		Higor Matheus da Costa Cordeiro, 
+#				Caua Ferraz Bittencourt,
+#				Joao Guilherme Miranda de Sousa Bispo
+#				Joao Victor Mendonca Martins
+
 .text
 main:
 	exec:
@@ -253,6 +260,15 @@ main:
 			jal  checkValidApartment			# Checa se o apartamento e valido
 			move $t1, $v0						# Armazena o valor retornado em $t1
 			beqz $t1, errorInvalidApartment		# Se o valor retornado for 0, indica erro de apartamento invalido
+			
+			# Calcula o offset do endereco do apartamento
+			move $a0, $s1				# Usa o numero do apartamento como parametro pra calcular o endereco do apartamento
+			jal  calculateApartAddress	# Calcula o endereco
+			move $t1, $v0				# Armazena o offset em $t1
+			la   $t2, moradores			# Carrega o endereco de moradores
+			add  $t2, $t2, $t1			# Incrementa o endereco a quantidade contida no offset
+			lw   $t1, 0($t2)			# Le a quantidade de moradores no Ap
+			beqz $t1, errorApVazio		# Se o ap estiver vazio, jump para error
 			
 			addi $s0, $s0, 25				# Incrementa o endereco de option para encontrar option 2
 			lb   $t1, 0($s0)				# carrega o caractere contido em option 2
@@ -554,6 +570,12 @@ main:
 			move $t0, $v0				# Armazena em $t0 a quantidade de options
 			bne  $t0, 1, errorInvalidOptions	# Se houver mais que duas options, imprime erro de Options
 			
+			# case all
+			move $a0, $s2		# carrega o endereco de options para comparar com all
+			la   $a1, all		# carrega o endereco de all
+			jal  strcmp			# Compara ambos
+			beqz $v0, infoAll	# se forem iguais, jump para infoAll
+			
 			# Converte strings numericas para inteiros
 			move $a0, $s2					# Passa $s2 como parametro para optionToInt
 			jal  optionToInt				# Transforma o valor contido na primeira option em inteiro
@@ -584,7 +606,7 @@ main:
 			bnez $t1, naoVazio			# Se nao estiver vazio jump para naoVazio
 			
 			vazio:
-				la $a0, apVazio			# Carrega a string apVazio
+				la  $a0, apVazio		# Carrega a string apVazio
 				jal mmio_printString	# Imprime a string
 				
 				b restart				# Reinicia o programa
@@ -794,7 +816,7 @@ main:
 			ori  $v0, $zero, 15		# servico 15 indica escrita no arquivo
 			move $a0, $s0			# passa o arquivo para escrita como parametro
 			la   $a1, nomes_moradores		# passa o endereco de moradores como parametro para ser escrito
-			li   $a2, 240			# numero de bytes a serem escritos
+			li   $a2, 3600			# numero de bytes a serem escritos
 			syscall					# escreve no arquivo
 			
 			ori  $v0, $zero, 16		# Servico 16 indica para fechar arquivo
@@ -1007,8 +1029,8 @@ main:
 
 			ori  $v0, $zero, 14		# servico 14 indica leitura de arquivo
 			move $a0, $s0			# Passa o arquivo aberto como parametro
-			la   $a1, motos_modelos		# endereco a ser armazenado o conteudo
-			li   $a2, 240			# numero de bytes a serem lidos
+			la   $a1, motos_modelos	# endereco a ser armazenado o conteudo
+			li   $a2, 480			# numero de bytes a serem lidos
 			syscall					# realiza a leitura
 
     		ori $v0, $zero, 16		# Servico 16 indica fechar arquivo
@@ -1049,6 +1071,166 @@ main:
 			la  $a0, motos
 			li  $a1, 384
 			jal clearAddress
+			
+			b restart
+			
+			
+		infoAll:
+			li $s4, 1	# Inicializa o contador
+			
+			printInfoAll:
+				move $a0, $s4		# move o contador como parametro de getApNumber
+				jal  getApNumber	# obtem o numero do ap baseado no contador
+				move $s3, $v0		# Armazena o resultado em $s3
+				move $a0, $s3		# Usa o retorno para transformar em string
+				jal  intToStr		# transforma o numero em string
+				move $s2, $v0		# aramzena o resultado em $s2
+				
+				# Imprime a string apartamento e o numero do apartamento
+				la   $a0, apartment		# Carrega a string apartment como parametro
+				jal  mmio_printString	# Imprime a string
+				move $a0, $s2			# Carrega o numero do apartamento como parametro
+				jal  mmio_printString	# Imprime o numero do apartamento
+				la   $a0, newLine		# Carrega newLine como parametro
+				jal  mmio_printString	# Imprime newLine
+				
+				# Calcula o offset do endereco do apartamento
+				move $a0, $s3				# Usa o numero do apartamento como parametro pra calcular o endereco do apartamento
+				jal  calculateApartAddress	# Calcula o endereco
+				move $t1, $v0				# Armazena o offset em $t1
+				la   $t2, moradores			# Carrega o endereco de moradores
+				add  $t2, $t2, $t1			# Incrementa o endereco a quantidade contida no offset
+				lw   $t1, 0($t2)			# Le a quantidade de moradores no Ap
+				bnez $t1, naoVazioAll		# Se nao estiver vazio jump para naoVazioAll
+				
+				vazioAll:
+					la  $a0, apVazio		# Carrega a string apVazio
+					jal mmio_printString	# Imprime a string
+				
+					b   incrementPrint		# Imprime o proximo ap
+				
+				naoVazioAll:	
+					# Adicao do nome do morador no endereco correto
+					move $a0, $s3				# Usa o numero do apartamento como parametro de calculateNomeAddress
+					jal  calculateNomeAddress	# Calcula o endereco do apartamento para armazenamento dos nomes
+					la   $s0, nomes_moradores	# Armazena o endereco de nomes_moradores em $t0
+					add  $s0, $s0, $v0			# Move ate o index retornado por calculateNomeAddress
+					li   $s1, 0					# Inicializa o contador de moradores com 0
+				
+					la   $a0, str_moradores		# Carrega a string moradores
+					jal  mmio_printString		# Imprime a string
+				
+					# Loop para imprimir todos os moradores do apartamento
+					loopPrintApAll:
+						bge  $s1, 6, printCarrosAll	# Se o contador for maior ou igual a 6, encerra
+						lb   $t2, 0($s0)			# Carrega o primeiro caractere do morador atual
+						beqz $t2, incrementPrintApAll	# Se for '\0', incrementa para o proximo morador
+					
+						move $a0, $s0				# Se nao for 0, imprime o morador atual
+						jal  mmio_printString		# imprime o morador atual
+						la   $a0, newLine			# carrega o caractere de newLine
+						jal  mmio_printString		# imprime o caractere de newLine
+					
+						# Incrementa o index do morador
+						incrementPrintApAll:
+							addi $s1, $s1, 1		# Incrementa o contador de moradores
+							addi $s0, $s0, 25		# Incrementa o index do morador
+							b    loopPrintApAll		# Recomeca o loop
+				
+					la   $a0, newLine			# carrega o caractere de newLine
+					jal  mmio_printString		# imprime o caractere de newLine
+					
+					printCarrosAll:	
+						la $s0, carros_modelos		# Carrega o endereco de carros_modelos
+						la $s1, carros				# carrega o endereco de carros
+				
+						# calcula o offset de modelos
+						move $a0, $s3				# Usa o numero de ap como argumento
+						jal  calculateModeloAddress	# Obtem o offset de modelo
+						add  $s0, $s0, $v0			# Incrementa o index de carros_modelos
+					
+						# Se o endereco for vazio, ignora a impressao
+						lb   $t0, 0($s0)		# carrega o primeiro caractere de modelos_carros
+						beqz $t0, printMotosAll	# Se for nulo, finaliza a impressao
+				
+						# Calcula o offset de modelos
+						move $a0, $s3				# usa o numero de ap como argumento
+						jal  calculateCarroAddress	# calcula o offset de carros
+						add  $s1, $s1, $v0			# Incrementa o index de carros em offset
+				
+						# Imprime a string carros
+						la  $a0, str_carro
+						jal mmio_printString
+					
+						# imprime o modelo do carro
+						move $a0, $s0
+						jal  mmio_printString
+					
+						# Imprime / 
+						la  $a0, slash
+						jal mmio_printString
+					
+						# Imprime a placa do carro
+						move $a0, $s1
+						jal  mmio_printString
+				
+						# Imprime newLine
+						la $a0, newLine
+						jal mmio_printString
+						
+						printMotosAll:
+							la   $s0, motos_modelos		# Carrega o endereco de modelos_motos
+							la   $s1, motos				# carrega o endereco de motos
+				
+							# calcula o offset de modelos
+							move $a0, $s3					# Usa o numero de ap como argumento
+							jal  calculateModeloMotoAddress	# Obtem o offset de modelo
+							add  $s0, $s0, $v0				# Incrementa o index de motos_modelos
+					
+							move $a0, $s3				# utiliza o numero do ap como argumento
+							jal  calculateMotoAddress	# calcula o endereco de motos
+							add  $s1, $s1, $v0			# Incrementa o endereco em offset bytes
+					
+							lb   $t0, 0($s0)			# carrega o primeiro caractere da primeira vaga
+							lb   $t1, 10($s0)			# carrega o primeiro caractere da segunda vaga
+							or   $t2, $t0, $t1			# aplica or nos dois caracteres
+					
+							beqz $t2, incrementPrint		# Se forem zero, nada e impresso
+							beqz $t0, printMoto2All		# Se a primeira vaga estiver vazia, imprime a segunda
+				
+							la   $a0, str_moto		# Carrega str_moto
+							jal  mmio_printString	# imprime str_moto
+							move $a0, $s0			# Usa o endereco de modelos_motos para impressao
+							jal  mmio_printString	# Imprime o modelo
+							la   $a0, slash			# carrega o /
+							jal  mmio_printString	# imprime o /
+							move $a0, $s1			# carrega o endereco de motos para impressao
+							jal  mmio_printString	# Imprime a placa da moto
+							la   $a0, newLine		# Carrega \n
+							jal  mmio_printString	# Imprime \n
+					
+							addi $s0, $s0, 10		# incrementa para a segunda vaga
+							addi $s1, $s1, 8		# incrementa para a placa da segunda vaga
+					
+							lb   $t0, 0($s0)		# Se não houver uma segunda moto, finaliza a impressao
+							beqz $t0, incrementPrint	# Encerra a impressao
+					
+							printMoto2All:
+								move $a0, $s0			# Usa o endereco de modelos_motos para impressao
+								jal  mmio_printString	# Imprime o modelo
+								la   $a0, slash			# carrega o /
+								jal  mmio_printString	# imprime o /
+								move $a0, $s1			# carrega o endereco de motos para impressao
+								jal  mmio_printString	# Imprime a placa da moto
+								la   $a0, newLine 		# Carrega \n
+								jal  mmio_printString	# Imprime \n
+			
+			incrementPrint:
+				# Imprime newLine
+				la $a0, newLine
+				jal mmio_printString
+				addi $s4, $s4, 1
+				blt  $s4, 25, printInfoAll
 			
 			b restart
 			
@@ -1101,6 +1283,12 @@ main:
 		# Erro de abertura de arquivo
 		errorOpenArquivo:
 			la  $a0, openFileError
+			jal mmio_printString
+			b   restart
+			
+		# erro de ap vazio
+		errorApVazio:
+			la  $a0, apVazioError
 			jal mmio_printString
 			b   restart
 		
