@@ -53,7 +53,7 @@ Este comando exclui todos os moradores e automóveis cadastrados para o apartame
 
 Exemplo de uso: limpar o apartamento 1001:
 
-`	limparAp --1001`
+`limparAp --1001`
 
 `infoAp --<option1>`
 
@@ -91,6 +91,7 @@ Vazios:		100 (25%)
 Deve salvar todas as informações registradas em um arquivo externo. Cabe aos projetistas do grupo elaborar uma estrutura adequada para o formato do(s) arquivo(s).
 recarregar
 Recarrega as informações salvas no arquivo externo na execução atual do programa. Modificações não salvas serão perdidas e as informações salvas anteriormente recuperadas.  
+
 `formatar`
 
 Apaga todas as informações da execução atual do programa, deixando todos os apartamentos vazios. Este comando não deve salvar automaticamente no arquivo externo, sendo necessário usar posteriormente o comando “salvar” para registrar a formação no arquivo externo.
