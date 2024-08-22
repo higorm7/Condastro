@@ -95,3 +95,6 @@ Recarrega as informações salvas no arquivo externo na execução atual do prog
 `formatar`
 
 Apaga todas as informações da execução atual do programa, deixando todos os apartamentos vazios. Este comando não deve salvar automaticamente no arquivo externo, sendo necessário usar posteriormente o comando “salvar” para registrar a formação no arquivo externo.
+
+
+https://www.canva.com/design/DAGOggTOgkw/IpEbTEhLHAoEMx8FsO4XvQ/edit?utm_content=DAGOggTOgkw&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
